@@ -4,7 +4,7 @@ spring:
     initialization-mode: always
     password: ${PASS}
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/paypal
+    url: jdbc:postgresql://localhost:5432/crypto
     username: postgres
   jpa:
     defer-datasource-initialization: true
@@ -21,11 +21,5 @@ spring:
 jwt:
   secret: security
 
-paypal:
-  mode: sandbox
-  client:
-    id: Afx4OhlhN1lj1-8-w-OVVYKzIBJwqSqzNIzd3PRDTH6YkEebvb4TOBiwL_tp3NN4DzJcf0ABMCvcZ4Qp
-    secret: EIk6cnDJiPCgEiLrh9Wy5WaJUQMU4XIIiPFBG6k1UVcgpaNDNdbBQcH7XXFFr3QWKuzdX-BEOJulNv8O
-
 server:
-  port: 8081
+  port: 8082
