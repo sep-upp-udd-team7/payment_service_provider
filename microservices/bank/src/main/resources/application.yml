@@ -1,12 +1,12 @@
 spring:
   application:
-    name: paypal-service
+    name: bank-service
   datasource:
     driverClassName: org.postgresql.Driver
     initialization-mode: always
     password: ${PASS}
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/paypal
+    url: jdbc:postgresql://localhost:5432/bank
     username: postgres
   jpa:
     defer-datasource-initialization: true
@@ -23,21 +23,12 @@ spring:
 jwt:
   secret: security
 
-paypal:
-  mode: sandbox
-  client:
-    id: Afx4OhlhN1lj1-8-w-OVVYKzIBJwqSqzNIzd3PRDTH6YkEebvb4TOBiwL_tp3NN4DzJcf0ABMCvcZ4Qp
-    secret: EIk6cnDJiPCgEiLrh9Wy5WaJUQMU4XIIiPFBG6k1UVcgpaNDNdbBQcH7XXFFr3QWKuzdX-BEOJulNv8O
-
 server:
-  port: 8084
+  port: 8080
   servlet:
-    context-path: /api/paypal
+    context-path: /api/bank
 
 eureka:
   client:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
-
-
-
