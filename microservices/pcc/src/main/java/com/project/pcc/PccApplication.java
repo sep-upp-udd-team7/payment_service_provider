@@ -1,4 +1,4 @@
-package com.project.crypto;
+package com.project.pcc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 @SpringBootApplication
 @EnableEurekaClient
-public class CryptoApplication {
+public class PccApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CryptoApplication.class, args);
+		SpringApplication.run(PccApplication.class, args);
 	}
 
 }
