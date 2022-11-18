@@ -1,12 +1,12 @@
 spring:
   application:
-    name: crypto-service
+    name: pcc-service
   datasource:
     driverClassName: org.postgresql.Driver
     initialization-mode: always
     password: ${PASS}
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/crypto
+    url: jdbc:postgresql://localhost:5432/pcc
     username: postgres
   jpa:
     defer-datasource-initialization: true
@@ -24,12 +24,11 @@ jwt:
   secret: security
 
 server:
-  port: 8082
+  port: 8085
   servlet:
-    context-path: /api/crypto
+    context-path: /api/pcc
 
 eureka:
   client:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
-
