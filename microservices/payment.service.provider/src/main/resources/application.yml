@@ -31,8 +31,6 @@ paypal:
 
 server:
   port: 8083
-  servlet:
-    context-path: /api/psp
 
 eureka:
   client:
