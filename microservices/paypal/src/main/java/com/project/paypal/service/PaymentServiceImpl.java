@@ -23,8 +23,8 @@ import java.util.List;
 public class PaymentServiceImpl implements PaymentService {
 
     private static final Integer transactionIdLength = 16;
-    private static final String cancelURL = "http://localhost:4200/";
-    private static final String returnURL = "http://localhost:4200/";
+    private static final String cancelURL = "http://localhost:4200/cancel-paypal-payment";
+    private static final String returnURL = "http://localhost:4200/paypal-payment-processing/";
     private final LocalTransactionRepository transactionRepository;
     private final APIContext apiContext;
 
@@ -38,6 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
         redirectUrls.setCancelUrl(cancelURL + "?transaction_id=" + localTransaction.getTransactionId());
         redirectUrls.setReturnUrl(returnURL + "?transaction_id=" + localTransaction.getTransactionId());
         payment.setRedirectUrls(redirectUrls);
+        apiContext.setMaskRequestId(true);
 
         return payment.create(apiContext);
     }

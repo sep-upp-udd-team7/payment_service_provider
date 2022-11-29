@@ -5,6 +5,7 @@ import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import com.project.paypal.dto.CreatePaymentDto;
 import com.project.paypal.dto.ExecutePaymentDto;
+import com.project.paypal.dto.PaypalRedirectUrlDto;
 import com.project.paypal.service.interfaces.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/create-payment")
-    public ResponseEntity<String> createPayment(@RequestBody CreatePaymentDto createPaymentDto) {
+    public ResponseEntity<PaypalRedirectUrlDto> createPayment(@RequestBody CreatePaymentDto createPaymentDto) {
         try {
             Payment payment = paymentService.createPayment(createPaymentDto.getAmount());
 
@@ -29,26 +30,28 @@ public class PaymentController {
             System.out.println(payment.getBillingAgreementTokens());
             for (Links link : payment.getLinks()) {
                 if (link.getRel().equals("approval_url")) {
-                    return new ResponseEntity<>(link.getHref(), HttpStatus.OK);
+                    PaypalRedirectUrlDto dto=new PaypalRedirectUrlDto();
+                    dto.setUrl(link.getHref());
+                    return new ResponseEntity<PaypalRedirectUrlDto>(dto, HttpStatus.OK);
                 }
             }
         } catch (PayPalRESTException e) {
             e.printStackTrace();
         }
-        return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new PaypalRedirectUrlDto(), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/execute")
-    public ResponseEntity executePayment(@RequestBody ExecutePaymentDto dto) {
+    public ResponseEntity<?> executePayment(@RequestBody ExecutePaymentDto dto) {
 
         try {
             boolean executed = paymentService.executePayment(dto);
             if (executed) {
-                return new ResponseEntity<>("Success Confirmed", HttpStatus.OK);
+                return new ResponseEntity<Boolean>(HttpStatus.OK);
             }
         } catch (PayPalRESTException e) {
             System.out.println(e.getMessage());
         }
-        return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
     }
 }
