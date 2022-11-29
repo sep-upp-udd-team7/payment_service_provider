@@ -96,6 +96,17 @@ public class PaymentServiceImpl implements PaymentService {
         return executed;
     }
 
+    @Override
+    public boolean cancelPayment(String transactionId) {
+        LocalTransaction transaction=transactionRepository.getByTransactionId(transactionId);
+        boolean isSuccessful=false;
+        if (transaction!=null){
+            transaction.setStatus(TransactionStatus.CANCELED);
+            isSuccessful=true;
+        }
+        return isSuccessful;
+    }
+
     private String generateTransactionId(int byteLength) {
         SecureRandom secureRandom = new SecureRandom();
         byte[] token = new byte[byteLength];

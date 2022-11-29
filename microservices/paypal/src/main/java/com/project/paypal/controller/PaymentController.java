@@ -10,10 +10,7 @@ import com.project.paypal.service.interfaces.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +27,7 @@ public class PaymentController {
             System.out.println(payment.getBillingAgreementTokens());
             for (Links link : payment.getLinks()) {
                 if (link.getRel().equals("approval_url")) {
-                    PaypalRedirectUrlDto dto=new PaypalRedirectUrlDto();
+                    PaypalRedirectUrlDto dto = new PaypalRedirectUrlDto();
                     dto.setUrl(link.getHref());
                     return new ResponseEntity<PaypalRedirectUrlDto>(dto, HttpStatus.OK);
                 }
@@ -53,5 +50,14 @@ public class PaymentController {
             System.out.println(e.getMessage());
         }
         return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("cancel-payment/{id}")
+    public ResponseEntity<?> cancelPayment(@PathVariable("id") String transactionId) {
+        if (paymentService.cancelPayment(transactionId)) {
+            return new ResponseEntity<Boolean>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }
