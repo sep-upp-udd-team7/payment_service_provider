@@ -23,7 +23,7 @@ public class SubscriptionPlan extends Model {
     private String currency;
 
     @Column(name = "amount")
-    private String amount;
+    private String amountValue;
 
 
 }

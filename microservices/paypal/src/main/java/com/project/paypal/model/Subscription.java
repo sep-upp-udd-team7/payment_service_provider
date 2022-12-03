@@ -20,11 +20,17 @@ public class Subscription extends Model {
     @Column(name = "start_date")
     private Date startDate;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "subscriber_mail")
+    private String subscriberMail;
 
-    @Column(name = "subscriber_id")
+    @Column(name="subscriber_id")
     private String subscriberId;
+
+    @Column(name="token")
+    private String token;
+
+    @Column(name="status")
+    private SubscriptionStatus status;
 
 
 }

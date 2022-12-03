@@ -1,28 +1,37 @@
 package com.project.paypal.controller;
 
-import com.paypal.api.payments.Plan;
+import com.paypal.api.payments.Agreement;
+import com.paypal.api.payments.Links;
 import com.paypal.base.rest.PayPalRESTException;
+import com.project.paypal.dto.PaypalRedirectUrlDto;
 import com.project.paypal.service.interfaces.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
-@RestController
+@RestController()
 @RequiredArgsConstructor
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @GetMapping("/create-plan")
-    public ResponseEntity<?> createSubscriptionPlan(){
-        try{
-            Plan plan=subscriptionService.createSubscriptionPlan();
-            System.out.println(plan);
+    @GetMapping("/subscriptions/create")
+    public ResponseEntity<?> createSubscription() {
+        try {
+            Agreement agreement = subscriptionService.createSubscription();
+            for (Links link : agreement.getLinks()) {
+                if (link.getRel().equals("approval_url")) {
+                    PaypalRedirectUrlDto dto = new PaypalRedirectUrlDto();
+                    dto.setUrl(link.getHref());
+                    return new ResponseEntity<PaypalRedirectUrlDto>(dto, HttpStatus.OK);
+                }
+            }
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (PayPalRESTException e) {
             e.printStackTrace();
@@ -34,4 +43,29 @@ public class SubscriptionController {
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @GetMapping("/subscriptions/execute/{token}")
+    public ResponseEntity<?> executeSubscription(@PathVariable String token) {
+        try {
+            if (subscriptionService.executeSubscription(token)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (PayPalRESTException e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @GetMapping("/subscriptions/cancel/{token}")
+    public ResponseEntity<?> cancelSubscription(@PathVariable String token){
+        if (subscriptionService.cancelSubscription(token)) {
+            return new ResponseEntity<Boolean>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }
