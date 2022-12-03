@@ -8,6 +8,7 @@ import com.project.paypal.model.LocalTransaction;
 import com.project.paypal.model.TransactionStatus;
 import com.project.paypal.repository.LocalTransactionRepository;
 import com.project.paypal.service.interfaces.PaymentService;
+import com.project.paypal.utils.RandomCharacterGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         localTransaction.setAmount(Double.parseDouble(price));
         localTransaction.setStatus(TransactionStatus.PENDING);
-        localTransaction.setTransactionId(generateTransactionId(transactionIdLength));
+        localTransaction.setTransactionId(RandomCharacterGenerator.generateURLSafeString(transactionIdLength));
         transactionRepository.save(localTransaction);
 
         return localTransaction;
@@ -107,10 +108,5 @@ public class PaymentServiceImpl implements PaymentService {
         return isSuccessful;
     }
 
-    private String generateTransactionId(int byteLength) {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] token = new byte[byteLength];
-        secureRandom.nextBytes(token);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(token);
-    }
+
 }
