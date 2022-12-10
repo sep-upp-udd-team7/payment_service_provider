@@ -6,7 +6,7 @@ spring:
     initialization-mode: always
     password: ${PASS}
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/bank
+    url: jdbc:postgresql://localhost:5432/bank_service
     username: postgres
   jpa:
     defer-datasource-initialization: true
