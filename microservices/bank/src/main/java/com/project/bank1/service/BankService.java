@@ -15,7 +15,7 @@ public class BankService {
         request.setAmount(dto.getAmount());
         request.setMerchantId(dto.getMerchantId());
         // TODO SD: na osnovu merchant id -> izvuci merchant pass
-        request.setMerchantPassword("iwoznljjrgwfinrkylmwzaqpsijhutdailaylwhxfoucnoncxapigphrucedmolsicyurvntbnvmhsrcpzleilsjlkocwiitvyde");
+        request.setMerchantPassword("paahakbudodwpjilsbdmmgjocmhwfxkxxwlxinwsvvigzaumeydpwtaacrsjqrjyuootdehhkvawrflqczhzhdsqfkraabsikuyz");
         request.setMerchantOrderId(dto.getMerchantOrderId());
         request.setMerchantTimestamp(LocalDateTime.now());
         request.setSuccessUrl(bankFrontendUrl + "/success");
