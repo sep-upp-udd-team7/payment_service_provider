@@ -6,4 +6,8 @@ import lombok.Data;
 public class CreatePaymentDto {
 
     private String amount;
+
+    private String transactionId;
+
+    private String shopId;
 }

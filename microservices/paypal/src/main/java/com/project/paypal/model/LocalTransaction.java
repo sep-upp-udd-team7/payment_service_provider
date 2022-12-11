@@ -17,6 +17,8 @@ public class LocalTransaction extends Model {
     @Column(name = "payerId")
     private String payerId;
 
+    private String payerMail;
+
     @Column(name = "description")
     private String description;
 
@@ -29,6 +31,8 @@ public class LocalTransaction extends Model {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TransactionStatus status;
+
+    private String merchantMail;
 
     @ManyToOne
     @JoinColumn(name = "merchant_id")

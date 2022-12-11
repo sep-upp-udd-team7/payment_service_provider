@@ -1,9 +1,10 @@
-package com.project.payment.service.provider.model;
+package com.project.auth_service.model;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name="payment_methods")
@@ -13,8 +14,7 @@ public class PaymentMethod extends Model{
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "web_shop_id")
-    private WebShop webShop;
+    @ManyToMany(mappedBy = "paymentMethods")
+    private Set<WebShop> webShops;
 
 }

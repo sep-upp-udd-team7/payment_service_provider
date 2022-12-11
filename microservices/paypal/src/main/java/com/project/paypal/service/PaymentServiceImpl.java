@@ -3,6 +3,7 @@ package com.project.paypal.service;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
+import com.project.paypal.dto.CreatePaymentDto;
 import com.project.paypal.dto.ExecutePaymentDto;
 import com.project.paypal.model.LocalTransaction;
 import com.project.paypal.model.TransactionStatus;
@@ -30,26 +31,26 @@ public class PaymentServiceImpl implements PaymentService {
     private final APIContext apiContext;
 
     @Override
-    public Payment createPayment(String price) throws PayPalRESTException {
+    public Payment createPayment(CreatePaymentDto createPaymentDto) throws PayPalRESTException {
 
-        Payment payment = createPaypalPayment(price);
-        LocalTransaction localTransaction = createLocalTransaction(price);
+        Payment payment = createPaypalPayment(createPaymentDto.getAmount());
+        LocalTransaction localTransaction = createLocalTransaction(createPaymentDto.getAmount(),createPaymentDto.getTransactionId());
 
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(cancelURL + "?transaction_id=" + localTransaction.getTransactionId());
-        redirectUrls.setReturnUrl(returnURL + "?transaction_id=" + localTransaction.getTransactionId());
+        redirectUrls.setCancelUrl(cancelURL + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
+        redirectUrls.setReturnUrl(returnURL + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
         payment.setRedirectUrls(redirectUrls);
         apiContext.setMaskRequestId(true);
 
         return payment.create(apiContext);
     }
 
-    private LocalTransaction createLocalTransaction(String price) {
+    private LocalTransaction createLocalTransaction(String price,String transactionId) {
         LocalTransaction localTransaction = new LocalTransaction();
 
         localTransaction.setAmount(Double.parseDouble(price));
         localTransaction.setStatus(TransactionStatus.PENDING);
-        localTransaction.setTransactionId(RandomCharacterGenerator.generateURLSafeString(transactionIdLength));
+        localTransaction.setTransactionId(transactionId);
         transactionRepository.save(localTransaction);
 
         return localTransaction;
@@ -91,6 +92,10 @@ public class PaymentServiceImpl implements PaymentService {
             LocalTransaction transaction = transactionRepository.getByTransactionId(executePaymentDto.getTransactionId());
             transaction.setStatus(TransactionStatus.CONFIRMED);
             transaction.setPayerId(executePaymentDto.getPayerId());
+            transaction.setPayerMail(payment.getPayer().getPayerInfo().getEmail());
+            transaction.setMerchantMail(payment.getTransactions().get(0).getPayee().getEmail());
+            transaction.setCurrency(payment.getTransactions().get(0).getAmount().getCurrency());
+            transaction.setDescription(payment.getTransactions().get(0).getDescription());
             transactionRepository.save(transaction);
             executed=true;
         }

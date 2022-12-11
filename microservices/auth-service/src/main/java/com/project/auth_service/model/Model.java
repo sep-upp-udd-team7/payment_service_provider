@@ -1,4 +1,4 @@
-package com.project.payment.service.provider.model;
+package com.project.auth_service.model;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;

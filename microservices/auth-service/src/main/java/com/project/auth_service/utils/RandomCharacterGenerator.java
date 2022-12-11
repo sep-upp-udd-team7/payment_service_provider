@@ -1,4 +1,4 @@
-package com.project.payment.service.provider.utils;
+package com.project.auth_service.utils;
 
 import java.security.SecureRandom;
 import java.util.Base64;

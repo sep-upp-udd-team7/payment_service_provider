@@ -21,7 +21,7 @@ public class PaymentController {
     @PostMapping("/create-payment")
     public ResponseEntity<PaypalRedirectUrlDto> createPayment(@RequestBody CreatePaymentDto createPaymentDto) {
         try {
-            Payment payment = paymentService.createPayment(createPaymentDto.getAmount());
+            Payment payment = paymentService.createPayment(createPaymentDto);
 
             System.out.println(payment);
             System.out.println(payment.getBillingAgreementTokens());
