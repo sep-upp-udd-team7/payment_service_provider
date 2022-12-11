@@ -34,3 +34,6 @@ eureka:
 bank-application:
   backend: http://localhost:8090/bank1
   frontend: http://localhost:3000
+
+bank-service:
+  frontend: http://localhost:4200
