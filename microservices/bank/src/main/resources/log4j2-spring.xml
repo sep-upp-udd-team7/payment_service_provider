@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" />
+        </Console>
+
+        <RollingFile name="DebugFile" fileName="logs/bank/debug.log"
+                     filePattern="logs/bank/debug.%d{dd-MM-yyyy}.log.gz">
+            <PatternLayout
+                    pattern="%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}|%level|%c|%msg%n"/>
+            <Filters>
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="fatal" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>
+
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="InfoFile" fileName="logs/bank/info.log"
+                     filePattern="logs/bank/info.%d{dd-MM-yyyy}.log.gz">
+            <PatternLayout
+                    pattern="%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}|%level|%c|%msg%n"/>
+            <Filters>
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="fatal" onMatch="DENY" onMismatch="NEUTRAL"/>
+
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="WarnFile" fileName="logs/bank/warn.log"
+                     filePattern="logs/bank/warn.%d{dd-MM-yyyy}.log.gz">
+            <PatternLayout
+                    pattern="%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}|%level|%c|%msg%n"/>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="fatal" onMatch="DENY" onMismatch="NEUTRAL"/>
+
+                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="ErrorFile" fileName="logs/bank/error.log"
+                     filePattern="logs/bank/error.%d{dd-MM-yyyy}.log.gz">
+            <PatternLayout
+                    pattern="%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}|%level|%c|%msg%n"/>
+            <Filters>
+                <ThresholdFilter level="fatal" onMatch="DENY" onMismatch="NEUTRAL"/>
+
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="FatalFile" fileName="logs/bank/fatal.log"
+                     filePattern="logs/bank/fatal.%d{dd-MM-yyyy}.log.gz">
+            <PatternLayout
+                    pattern="%d{dd-MM-yyyy HH:mm:ss.SSS}{GMT+0}|%level|%c|%msg%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="DebugFile" level="debug"/>
+            <AppenderRef ref="InfoFile" level="info"/>
+            <AppenderRef ref="WarnFile" level="warn"/>
+            <AppenderRef ref="ErrorFile" level="error"/>
+            <AppenderRef ref="FatalFile" level="fatal"/>
+        </Root>
+    </Loggers>
+</Configuration>
