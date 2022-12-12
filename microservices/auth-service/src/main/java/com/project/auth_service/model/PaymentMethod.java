@@ -16,5 +16,4 @@ public class PaymentMethod extends Model{
 
     @ManyToMany(mappedBy = "paymentMethods")
     private Set<WebShop> webShops;
-
 }
