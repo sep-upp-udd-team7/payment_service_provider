@@ -31,9 +31,12 @@ eureka:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
 
-bank-application:
+bank1-application:
   backend: http://localhost:8090/bank1
-  frontend: http://localhost:3000
 
-bank-service:
+bank2-application:
+  backend: http://localhost:8091/bank1
+
+psp:
   frontend: http://localhost:4200
+

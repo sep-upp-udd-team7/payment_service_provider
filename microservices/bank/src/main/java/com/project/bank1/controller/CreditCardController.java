@@ -3,10 +3,13 @@ package com.project.bank1.controller;
 import com.project.bank1.dto.OnboardingRequestDto;
 import com.project.bank1.dto.AcquirerResponseDto;
 import com.project.bank1.dto.RequestDto;
-import com.project.bank1.service.BankService;
+import com.project.bank1.model.Acquirer;
+import com.project.bank1.service.AcquirerService;
+import com.project.bank1.service.CreditCardService;
 import com.project.bank1.service.LoggerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,40 +25,45 @@ public class CreditCardController {
     @Autowired
     private Environment environment;
     @Autowired
-    private BankService bankService;
+    private CreditCardService creditCardService;
+    @Autowired
+    private AcquirerService acquirerService;
 
     private LoggerService loggerService = new LoggerService(this.getClass());
 
     @RequestMapping(method = RequestMethod.POST, value = "/onboarding")
-    public AcquirerResponseDto validate(@RequestBody OnboardingRequestDto dto){
-        String bankBackendUrl = environment.getProperty("bank-application.backend");
-        String bankFrontendUrl = environment.getProperty("bank-application.frontend");
+    public ResponseEntity<?> validate(@RequestBody OnboardingRequestDto dto){
+        try {
+            RequestDto request = creditCardService.validateAcquirer(dto);
+            loggerService.validateAcquirer(dto.getMerchantId(), dto.getMerchantOrderId());
+            Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
 
-        RequestDto request = bankService.validateAcquirer(dto, bankFrontendUrl);
-        loggerService.validateAcquirer(dto.getMerchantId(), dto.getMerchantOrderId());
+            ResponseEntity<AcquirerResponseDto> response = webClient.post()
+                    .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
+                    .body(BodyInserters.fromValue(request))
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .toEntity(AcquirerResponseDto.class)
+                    .block();
 
-        ResponseEntity<AcquirerResponseDto> response = webClient.post()
-                .uri( bankBackendUrl + validateIssuerEndpoint)
-                .body(BodyInserters.fromValue(request))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .toEntity(AcquirerResponseDto.class)
-                .block();
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-            AcquirerResponseDto responseDto = new AcquirerResponseDto();
-            responseDto.setPaymentId(response.getBody().getPaymentId());
-            responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
-            return responseDto;
-        } else {
-            String paymentUrl = environment.getProperty("bank-service.frontend") + "/bank-error";
-            System.out.println(paymentUrl);
-            AcquirerResponseDto responseDto = new AcquirerResponseDto();
-            if (response.getStatusCode() != null) {
+            if (response.getStatusCode().is2xxSuccessful()) {
+                AcquirerResponseDto responseDto = new AcquirerResponseDto();
                 responseDto.setPaymentId(response.getBody().getPaymentId());
+                responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
+                return new ResponseEntity<>(responseDto, HttpStatus.OK);
+            } else {
+                // TODO SD: ovo ispraviti kada se dodaju stranice na frontu
+                String pspFrontendUrl = environment.getProperty("psp.frontend") + "/error";
+                System.out.println(pspFrontendUrl);
+                AcquirerResponseDto responseDto = new AcquirerResponseDto();
+                if (response.getStatusCode() != null) {
+                    responseDto.setPaymentId(response.getBody().getPaymentId());
+                }
+                responseDto.setPaymentUrl(pspFrontendUrl);
+                return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
             }
-            responseDto.setPaymentUrl(paymentUrl);
-            return responseDto;
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

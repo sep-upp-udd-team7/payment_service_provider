@@ -24,7 +24,7 @@ public class TestController {
 
     @GetMapping("/test1")
     public String test1(){
-        String bankBackendUl = environment.getProperty("bank-application.backend");
+        String bankBackendUl = environment.getProperty("bank1-application.backend");
         System.out.println(bankBackendUl);
         ResponseEntity<String> response = webClient.get()
                 .uri( bankBackendUl + bankTestEndpoint)
@@ -36,5 +36,11 @@ public class TestController {
         } else {
             return "Error!";
         }
+    }
+
+    @GetMapping("/test2")
+    public String test2() {
+        String bankBackendUl = environment.getProperty("bank1-application.backend" + "2");
+        return bankBackendUl;
     }
 }
