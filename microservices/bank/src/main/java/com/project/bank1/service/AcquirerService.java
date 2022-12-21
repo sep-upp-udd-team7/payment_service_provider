@@ -1,9 +1,6 @@
 package com.project.bank1.service;
 
-import com.netflix.discovery.converters.Auto;
 import com.project.bank1.dto.AcquirerDto;
-import com.project.bank1.dto.AcquirerResponseDto;
-import com.project.bank1.dto.BankDto;
 import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Bank;
 import com.project.bank1.repository.AcquirerRepository;

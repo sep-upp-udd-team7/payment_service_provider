@@ -32,8 +32,9 @@ public class CreditCardController {
     private LoggerService loggerService = new LoggerService(this.getClass());
 
     @RequestMapping(method = RequestMethod.POST, value = "/onboarding")
-    public ResponseEntity<?> validate(@RequestBody OnboardingRequestDto dto){
+    public ResponseEntity<?> onboarding(@RequestBody OnboardingRequestDto dto){
         try {
+            // TODO SD: kreirati transakciju
             RequestDto request = creditCardService.validateAcquirer(dto);
             loggerService.validateAcquirer(dto.getMerchantId(), dto.getMerchantOrderId());
             Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
@@ -47,24 +48,32 @@ public class CreditCardController {
                     .block();
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                AcquirerResponseDto responseDto = new AcquirerResponseDto();
-                responseDto.setPaymentId(response.getBody().getPaymentId());
-                responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
-                return new ResponseEntity<>(responseDto, HttpStatus.OK);
+                return new ResponseEntity<>(getAcquirerResponseDtoWhenResponseIsSuccessful(response), HttpStatus.OK);
             } else {
-                // TODO SD: ovo ispraviti kada se dodaju stranice na frontu
-                String pspFrontendUrl = environment.getProperty("psp.frontend") + "/error";
-                System.out.println(pspFrontendUrl);
-                AcquirerResponseDto responseDto = new AcquirerResponseDto();
-                if (response.getStatusCode() != null) {
-                    responseDto.setPaymentId(response.getBody().getPaymentId());
-                }
-                responseDto.setPaymentUrl(pspFrontendUrl);
-                return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(getAcquirerResponseDtoWhenResponseIsUnsuccessful(response), HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private AcquirerResponseDto getAcquirerResponseDtoWhenResponseIsUnsuccessful(ResponseEntity<AcquirerResponseDto> response) {
+        String pspFrontendUrl = environment.getProperty("psp.frontend");
+        String errorPaymentUrl = pspFrontendUrl + environment.getProperty("psp.error-payment");
+        System.out.println(errorPaymentUrl);
+        AcquirerResponseDto responseDto = new AcquirerResponseDto();
+        if (response.getStatusCode() != null) {
+            responseDto.setPaymentId(response.getBody().getPaymentId());
+        }
+        responseDto.setPaymentUrl(errorPaymentUrl);
+        return responseDto;
+    }
+
+    private AcquirerResponseDto getAcquirerResponseDtoWhenResponseIsSuccessful(ResponseEntity<AcquirerResponseDto> response) {
+        AcquirerResponseDto responseDto = new AcquirerResponseDto();
+        responseDto.setPaymentId(response.getBody().getPaymentId());
+        responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
+        return responseDto;
     }
 
 }

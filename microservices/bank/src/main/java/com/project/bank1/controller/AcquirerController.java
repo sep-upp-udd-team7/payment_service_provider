@@ -19,7 +19,7 @@ public class AcquirerController {
     private AcquirerService acquirerService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/register")
-    public ResponseEntity<?> validate(@RequestBody AcquirerDto dto){
+    public ResponseEntity<?> register(@RequestBody AcquirerDto dto){
         AcquirerDto response = acquirerService.register(dto);
         if (response == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

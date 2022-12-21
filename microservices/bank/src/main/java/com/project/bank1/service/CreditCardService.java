@@ -20,18 +20,17 @@ public class CreditCardService {
         String pspFrontendUrl = environment.getProperty("psp.frontend");
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         if(acquirer == null) {
-            throw new Exception("Merchant's credentials are incorrect or do not exist");
+            throw new Exception("Merchant's credentials are incorrect or merchant is not registered");
         }
         RequestDto request = new RequestDto();
         request.setAmount(dto.getAmount());
-        request.setMerchantId(dto.getMerchantId());
+        request.setMerchantId(dto.getMerchantId());  // TODO: ??????
         request.setMerchantPassword(acquirer.getMerchantPassword());
         request.setMerchantOrderId(dto.getMerchantOrderId());
-        request.setMerchantTimestamp(LocalDateTime.now());
-        // TODO SD: ovo ispraviti kada se naprave stranice na frontu
-        request.setSuccessUrl(pspFrontendUrl + "/success");
-        request.setFailedUrl(pspFrontendUrl + "/failed");
-        request.setErrorUrl(pspFrontendUrl + "/error");
+        request.setMerchantTimestamp(dto.getMerchantTimestamp());
+        request.setSuccessUrl(pspFrontendUrl + environment.getProperty("psp.success-payment"));
+        request.setFailedUrl(pspFrontendUrl + environment.getProperty("psp.failed-payment"));
+        request.setErrorUrl(pspFrontendUrl + environment.getProperty("psp.error-payment"));
         return request;
     }
 
