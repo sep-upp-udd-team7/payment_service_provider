@@ -40,6 +40,6 @@ bank2-application:
 psp:
   frontend: http://localhost:4200
   error-payment: /bank-cancel
-  success-payment: /bank-success
+  success-payment: /bank-succes
   failed-payment: /bank-failed
 
