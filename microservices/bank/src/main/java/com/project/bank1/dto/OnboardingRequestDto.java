@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 public class OnboardingRequestDto {
     private String merchantOrderId;
     private Double amount;
-    private String merchantId;
     private LocalDateTime merchantTimestamp;
-
-    // TODO SD: dodati jos podataka
+    private String merchantId;  // TODO SD: merchant id obrisati - kada bude uradjena autentifikacija
 }

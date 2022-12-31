@@ -1,11 +1,11 @@
 package com.project.bank1.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.bank1.enums.TransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

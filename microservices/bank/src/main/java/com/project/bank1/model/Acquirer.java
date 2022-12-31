@@ -25,6 +25,6 @@ public class Acquirer {
     @JoinColumn(name = "bank_id")
     private Bank bank;
 
-    @OneToMany(mappedBy = "acquirer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "acquirer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Transaction> transactions = new HashSet<>();
 }

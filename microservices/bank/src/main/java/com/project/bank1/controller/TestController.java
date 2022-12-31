@@ -37,10 +37,4 @@ public class TestController {
             return "Error!";
         }
     }
-
-    @GetMapping("/test2")
-    public String test2() {
-        String bankBackendUl = environment.getProperty("bank1-application.backend" + "2");
-        return bankBackendUl;
-    }
 }

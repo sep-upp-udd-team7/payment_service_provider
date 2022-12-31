@@ -1,7 +1,7 @@
 package com.project.bank1.controller;
 
 import com.project.bank1.dto.AcquirerDto;
-import com.project.bank1.service.AcquirerService;
+import com.project.bank1.service.interfaces.AcquirerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
