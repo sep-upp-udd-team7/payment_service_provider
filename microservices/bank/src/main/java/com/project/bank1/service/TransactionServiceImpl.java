@@ -33,7 +33,7 @@ public class TransactionServiceImpl implements TransactionService {
         t.setErrorURL(request.getErrorUrl());
         t.setFailedURL(request.getFailedUrl());
         t.setStatus(TransactionStatus.CREATED);
-        t.setAcquirerBankAccount(acquirer.getId());
+//        t.setAcquirerBankAccount(acquirer.getId());
         t.setAcquirer(acquirer);
         return t;
     }

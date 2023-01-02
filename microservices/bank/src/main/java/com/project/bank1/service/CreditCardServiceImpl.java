@@ -67,13 +67,20 @@ public class CreditCardServiceImpl implements CreditCardService {
                 .retrieve()
                 .toEntity(AcquirerResponseDto.class)
                 .block();
-        if (!response.getStatusCode().is2xxSuccessful()) {
+        if (response.getStatusCode().is5xxServerError()) {
+            System.out.println("Error transaction!!!");
             transaction.setStatus(TransactionStatus.ERROR);
             transactionService.save(transaction);
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
             throw new Exception(errorPaymentUrl);
         }
-
+        if (response.getStatusCode().is4xxClientError()) {
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionService.save(transaction);
+            String failedPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.failed-payment");
+            throw new Exception(failedPaymentUrl);
+        }
+        transaction.setPaymentId(response.getBody().getPaymentId());
         transactionService.save(transaction);
         return getAcquirerResponseDtoWhenResponseIsSuccessful(response);
     }

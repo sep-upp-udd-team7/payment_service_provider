@@ -44,11 +44,8 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "acquirer_bank_account_id")
-    private Long acquirerBankAccount;
-
-    @Column(name = "issuer_bank_account_id")
-    private Long issuerBankAccountId;
+    @Column(name = "payment_id")
+    private String paymentId;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "bank")
