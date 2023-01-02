@@ -1,7 +1,5 @@
 package com.project.bank1.controller;
 
-import com.netflix.discovery.converters.Auto;
-import com.project.bank1.config.WebClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;

@@ -3,6 +3,7 @@ package com.project.bank1.service;
 import com.project.bank1.dto.AcquirerResponseDto;
 import com.project.bank1.dto.OnboardingRequestDto;
 import com.project.bank1.dto.RequestDto;
+import com.project.bank1.dto.ResponseDto;
 import com.project.bank1.enums.TransactionStatus;
 import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Transaction;
@@ -60,40 +61,69 @@ public class CreditCardServiceImpl implements CreditCardService {
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
 
-        ResponseEntity<AcquirerResponseDto> response = webClient.post()
-                .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
-                .body(BodyInserters.fromValue(request))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .toEntity(AcquirerResponseDto.class)
-                .block();
-        if (response.getStatusCode().is5xxServerError()) {
-            System.out.println("Error transaction!!!");
+        try {
+            ResponseEntity<AcquirerResponseDto> response = webClient.post()
+                    .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
+                    .body(BodyInserters.fromValue(request))
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .toEntity(AcquirerResponseDto.class)
+                    .block();
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Error transaction!!!");
+                transaction.setStatus(TransactionStatus.ERROR);
+                transactionService.save(transaction);
+                String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
+                throw new Exception(errorPaymentUrl);
+            }
+            transaction.setPaymentId(response.getBody().getPaymentId());
+            transactionService.save(transaction);
+            return getAcquirerResponseDtoWhenResponseIsSuccessful(response);
+        } catch (Exception e) {
+            // ako aplikacija banke nije dostupna
             transaction.setStatus(TransactionStatus.ERROR);
             transactionService.save(transaction);
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
             throw new Exception(errorPaymentUrl);
         }
-        if (response.getStatusCode().is4xxClientError()) {
-            transaction.setStatus(TransactionStatus.FAILED);
-            transactionService.save(transaction);
-            String failedPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.failed-payment");
-            throw new Exception(failedPaymentUrl);
+    }
+
+    @Override
+    public String finishPayment(ResponseDto dto) throws Exception {
+        Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
+        if (t == null) {
+            System.out.println(String.format("Transaction with payment ID: %s not found", dto.getPaymentId()));
+            String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
+            throw new Exception(errorPaymentUrl);
         }
-        transaction.setPaymentId(response.getBody().getPaymentId());
-        transactionService.save(transaction);
-        return getAcquirerResponseDtoWhenResponseIsSuccessful(response);
+        t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
+        return getRedirectionUrl(dto.getTransactionStatus(), t);
+    }
+
+    private String getRedirectionUrl(String transactionStatus, Transaction transaction) {
+        if (transactionStatus.equals("FAILED")) {
+            return transaction.getFailedURL();
+        } else if (transactionStatus.equals("ERROR")) {
+            return transaction.getErrorURL();
+        }
+        return transaction.getSuccessURL();
+    }
+
+    private TransactionStatus getTransactionStatusFromDto(String transactionStatus) {
+        if (transactionStatus.equals("FAILED")) {
+            return TransactionStatus.FAILED;
+        } else if (transactionStatus.equals("ERROR")) {
+            return TransactionStatus.ERROR;
+        }
+        return TransactionStatus.SUCCESS;
     }
 
     private AcquirerResponseDto getAcquirerResponseDtoWhenResponseIsSuccessful(ResponseEntity<AcquirerResponseDto> response) {
         AcquirerResponseDto responseDto = new AcquirerResponseDto();
-        if (response.getBody() != null) {
-            responseDto.setPaymentId(response.getBody().getPaymentId());
-            responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
-            return responseDto;
-        }
-        System.out.println("Response AcquirerResponseDto body is null");
-        return null;
+        responseDto.setPaymentId(response.getBody().getPaymentId());
+        responseDto.setPaymentUrl(response.getBody().getPaymentUrl());
+        return responseDto;
     }
 
 }

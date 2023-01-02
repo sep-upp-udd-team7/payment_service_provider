@@ -9,4 +9,6 @@ public interface TransactionService {
     void save(Transaction transaction);
 
     Transaction createTransaction(RequestDto request, Acquirer acquirer);
+
+    Transaction findByPaymentId(String paymentId);
 }

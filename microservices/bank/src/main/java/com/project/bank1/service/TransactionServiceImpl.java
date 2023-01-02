@@ -37,4 +37,14 @@ public class TransactionServiceImpl implements TransactionService {
         t.setAcquirer(acquirer);
         return t;
     }
+
+    @Override
+    public Transaction findByPaymentId(String paymentId) {
+        for (Transaction t: transactionRepository.findAll()) {
+            if (t.getPaymentId().equals(paymentId)) {
+                return t;
+            }
+        }
+        return null;
+    }
 }
