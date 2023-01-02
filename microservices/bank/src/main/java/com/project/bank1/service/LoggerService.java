@@ -14,4 +14,8 @@ public class LoggerService {
     public void validateAcquirer(String merchantId, String merchantOrderId) {
         logger.info("Validating acquirer. Merchant ID: {} with order ID: {}", merchantId, merchantOrderId);
     }
+
+    public void invalidMerchantCredentials(String merchantId) {
+        logger.error("Merchant's credentials are incorrect (ID: {}) or merchant is not registered", merchantId);
+    }
 }

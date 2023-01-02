@@ -1,7 +1,5 @@
 package com.project.bank1.controller;
 
-import com.netflix.discovery.converters.Auto;
-import com.project.bank1.config.WebClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +34,5 @@ public class TestController {
         } else {
             return "Error!";
         }
-    }
-
-    @GetMapping("/test2")
-    public String test2() {
-        String bankBackendUl = environment.getProperty("bank1-application.backend" + "2");
-        return bankBackendUl;
     }
 }
