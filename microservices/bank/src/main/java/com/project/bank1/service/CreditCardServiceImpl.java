@@ -71,7 +71,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                     .block();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Error transaction!!!");
+                System.out.println("Error transaction!!!!");
                 transaction.setStatus(TransactionStatus.ERROR);
                 transactionService.save(transaction);
                 String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
