@@ -1,7 +1,7 @@
 package com.project.bank1.controller;
 
 import com.project.bank1.dto.AcquirerDto;
-import com.project.bank1.service.AcquirerService;
+import com.project.bank1.service.interfaces.AcquirerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +19,7 @@ public class AcquirerController {
     private AcquirerService acquirerService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/register")
-    public ResponseEntity<?> validate(@RequestBody AcquirerDto dto){
+    public ResponseEntity<?> register(@RequestBody AcquirerDto dto){
         AcquirerDto response = acquirerService.register(dto);
         if (response == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,17 +1,17 @@
 package com.project.bank1.service;
 
-import com.netflix.discovery.converters.Auto;
 import com.project.bank1.dto.AcquirerDto;
-import com.project.bank1.dto.AcquirerResponseDto;
-import com.project.bank1.dto.BankDto;
+import com.project.bank1.mapper.BankMapper;
 import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Bank;
 import com.project.bank1.repository.AcquirerRepository;
+import com.project.bank1.service.interfaces.AcquirerService;
+import com.project.bank1.service.interfaces.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AcquirerService {
+public class AcquirerServiceImpl implements AcquirerService {
     @Autowired
     private BankService bankService;
     @Autowired
@@ -23,6 +23,7 @@ public class AcquirerService {
         acquirer.setMerchantPassword(dto.getMerchantPassword());
         Bank bank = bankService.findByName(dto.getBank().getName());
         if (bank == null) {
+            System.out.println("Bank " + dto.getBank().getName() + " not found");
             return null;
         }
         acquirer.setBank(bank);
@@ -30,9 +31,11 @@ public class AcquirerService {
 
         Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
         if (a == null) {
+            System.out.println("ACQUIRER with merchant id " + dto.getMerchantId() + " not found");
             return null;
         }
         dto.setId(a.getId());
+        dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
         return dto;
     }
 

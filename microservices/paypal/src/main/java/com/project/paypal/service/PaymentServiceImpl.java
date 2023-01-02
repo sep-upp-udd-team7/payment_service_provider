@@ -9,6 +9,7 @@ import com.project.paypal.model.LocalTransaction;
 import com.project.paypal.model.TransactionStatus;
 import com.project.paypal.repository.LocalTransactionRepository;
 import com.project.paypal.service.interfaces.PaymentService;
+import com.project.paypal.utils.LogData;
 import com.project.paypal.utils.RandomCharacterGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,11 @@ import java.util.List;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    private static final Integer transactionIdLength = 16;
     private static final String cancelURL = "http://localhost:4200/cancel-paypal-payment";
     private static final String returnURL = "http://localhost:4200/paypal-payment-processing/";
     private final LocalTransactionRepository transactionRepository;
     private final APIContext apiContext;
+    private LoggerService loggerService = new LoggerService(this.getClass());
 
     @Override
     public Payment createPayment(CreatePaymentDto createPaymentDto) throws PayPalRESTException {
@@ -51,8 +52,11 @@ public class PaymentServiceImpl implements PaymentService {
         localTransaction.setAmount(Double.parseDouble(price));
         localTransaction.setStatus(TransactionStatus.PENDING);
         localTransaction.setTransactionId(transactionId);
+        localTransaction.setCurrency("USD");
         transactionRepository.save(localTransaction);
 
+        String message=String.format("Local transaction with id:%s and price:%s created",transactionId,price);
+        loggerService.logInfo(new LogData(message));
         return localTransaction;
     }
 
@@ -81,22 +85,24 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public boolean executePayment(ExecutePaymentDto executePaymentDto) throws PayPalRESTException {
+    public boolean executePayment(ExecutePaymentDto dto) throws PayPalRESTException {
         boolean executed=false;
         Payment payment = new Payment();
-        payment.setId(executePaymentDto.getPaymentId());
+        payment.setId(dto.getPaymentId());
         PaymentExecution paymentExecute = new PaymentExecution();
-        paymentExecute.setPayerId(executePaymentDto.getPayerId());
+        paymentExecute.setPayerId(dto.getPayerId());
         payment=payment.execute(apiContext, paymentExecute);
         if (payment.getState().equals("approved")) {
-            LocalTransaction transaction = transactionRepository.getByTransactionId(executePaymentDto.getTransactionId());
+            LocalTransaction transaction = transactionRepository.getByTransactionId(dto.getTransactionId());
             transaction.setStatus(TransactionStatus.CONFIRMED);
-            transaction.setPayerId(executePaymentDto.getPayerId());
+            transaction.setPayerId(dto.getPayerId());
             transaction.setPayerMail(payment.getPayer().getPayerInfo().getEmail());
             transaction.setMerchantMail(payment.getTransactions().get(0).getPayee().getEmail());
             transaction.setCurrency(payment.getTransactions().get(0).getAmount().getCurrency());
             transaction.setDescription(payment.getTransactions().get(0).getDescription());
             transactionRepository.save(transaction);
+            String message=String.format("Transaction with id %s is successfully executed by payer %s",dto.getTransactionId(),dto.getPayerId());
+            loggerService.logInfo(new LogData(message));
             executed=true;
         }
         return executed;
@@ -107,7 +113,10 @@ public class PaymentServiceImpl implements PaymentService {
         LocalTransaction transaction=transactionRepository.getByTransactionId(transactionId);
         boolean isSuccessful=false;
         if (transaction!=null){
+            String message=String.format("Transaction with id %s is successfully canceled",transactionId);
+            loggerService.logInfo(new LogData(message));
             transaction.setStatus(TransactionStatus.CANCELED);
+            transactionRepository.save(transaction);
             isSuccessful=true;
         }
         return isSuccessful;
