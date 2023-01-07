@@ -47,4 +47,32 @@ public class AcquirerServiceImpl implements AcquirerService {
         }
         return null;
     }
+
+    @Override
+    public AcquirerDto registerQrCode(AcquirerDto dto) {
+        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if(acquirer == null){
+            acquirer  = new Acquirer();
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            if (bank == null) {
+                System.out.println("Bank " + dto.getBank().getName() + " not found");
+                return null;
+            }
+            acquirer.setBank(bank);
+        }else{
+            acquirer.setQrCodePayment(true);
+        }
+        acquirerRepository.save(acquirer);
+
+        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if (a == null) {
+            System.out.println("ACQUIRER with merchant id " + dto.getMerchantId() + " not found");
+            return null;
+        }
+        dto.setId(a.getId());
+        dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
+        return dto;
+    }
 }

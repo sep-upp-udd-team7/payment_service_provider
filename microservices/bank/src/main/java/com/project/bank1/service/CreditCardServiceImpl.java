@@ -52,6 +52,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         request.setSuccessUrl(pspFrontendUrl + env.getProperty("psp.success-payment"));
         request.setFailedUrl(pspFrontendUrl + env.getProperty("psp.failed-payment"));
         request.setErrorUrl(pspFrontendUrl + env.getProperty("psp.error-payment"));
+        request.setQrCode(dto.getQrCode());
         return request;
     }
 
@@ -60,7 +61,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         RequestDto request = creditCardService.validateAcquirer(dto);
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
-
+        System.out.println("na ovaj url ce da ide: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
         try {
             ResponseEntity<AcquirerResponseDto> response = webClient.post()
                     .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
@@ -91,6 +92,9 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public String finishPayment(ResponseDto dto) throws Exception {
+        System.out.println("Finish payment....");
+        System.out.println("Payment id: " + dto.getPaymentId());
+
         Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
         if (t == null) {
             System.out.println(String.format("Transaction with payment ID: %s not found", dto.getPaymentId()));

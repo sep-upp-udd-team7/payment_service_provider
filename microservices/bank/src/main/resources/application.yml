@@ -35,7 +35,7 @@ bank1-application:
   backend: http://localhost:8090/bank1
 
 bank2-application:
-  backend: http://localhost:8091/bank1
+  backend: http://localhost:8099/bank2
 
 psp:
   frontend: http://localhost:4200

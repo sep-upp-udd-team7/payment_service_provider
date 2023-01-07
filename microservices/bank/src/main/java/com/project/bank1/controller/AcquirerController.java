@@ -27,4 +27,13 @@ public class AcquirerController {
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/registerQrCode")
+    public ResponseEntity<?> registerQrCode(@RequestBody AcquirerDto dto){
+        AcquirerDto response = acquirerService.registerQrCode(dto);
+        if (response == null) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
 }
