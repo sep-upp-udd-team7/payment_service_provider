@@ -18,6 +18,7 @@ public class AcquirerServiceImpl implements AcquirerService {
     private AcquirerRepository acquirerRepository;
 
     public AcquirerDto register(AcquirerDto dto) {
+        //TODO KS: dodati provjeru ako vec postoji acquirer da ga ne dodaje opet jer je automatski dodat na banku prilikom dodavanja qr code opcije
         Acquirer acquirer = new Acquirer();
         acquirer.setMerchantId(dto.getMerchantId());
         acquirer.setMerchantPassword(dto.getMerchantPassword());
@@ -61,6 +62,7 @@ public class AcquirerServiceImpl implements AcquirerService {
                 return null;
             }
             acquirer.setBank(bank);
+            acquirer.setQrCodePayment(true);
         }else{
             acquirer.setQrCodePayment(true);
         }
