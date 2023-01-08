@@ -200,4 +200,4 @@ README.html
 .idea
 .exercism
 
-./logs/*
+microservices/logs/
