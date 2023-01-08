@@ -13,23 +13,29 @@ import java.util.List;
 
 @Service
 public class BankServiceImpl implements BankService {
+    private LoggerService loggerService = new LoggerService(this.getClass());
     @Autowired
     private BankRepository bankRepository;
 
     public Bank findByName(String name) {
+        loggerService.infoLog(String.format("Finding bank by bank name: {}", name));
         for (Bank b: bankRepository.findAll()) {
             if (b.getName().equals(name)) {
+                loggerService.successLog(String.format("Found bank with ID: {} by name: {}", b.getId(), b.getName()));
                 return b;
             }
         }
+        loggerService.errorLog(String.format("Not found bank with name: ", name));
         return null;
     }
 
     public List<BankDto> getAll() {
+        loggerService.infoLog("Get all banks from Payment service provider");
         List<BankDto> dtos = new ArrayList<>();
         for (Bank b: bankRepository.findAll()) {
             dtos.add(new BankMapper().mapModelToDto(b));
         }
+        loggerService.debugLog(String.format("Found {} banks in Payment service provider", dtos.size()));
         return dtos;
     }
 }

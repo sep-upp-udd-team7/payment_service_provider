@@ -23,7 +23,7 @@ public class AcquirerController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/register")
     public ResponseEntity<?> register(@RequestBody AcquirerDto dto){
-        loggerService.infoLog("Registering new acquirer");
+        loggerService.infoLog(String.format("Registering new acquirer with merchant ID {} in bank {}", dto.getMerchantId(), dto.getBank().getName() ));
         AcquirerDto response = acquirerService.register(dto);
         if (response == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

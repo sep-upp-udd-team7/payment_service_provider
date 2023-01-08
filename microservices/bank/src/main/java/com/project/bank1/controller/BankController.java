@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/banks", produces = MediaType.APPLICATION_JSON_VALUE)
 public class BankController {
+    private LoggerService loggerService = new LoggerService(this.getClass());
     @Autowired
     private BankService bankService;
-    private LoggerService loggerService = new LoggerService(this.getClass());
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/getAll")
