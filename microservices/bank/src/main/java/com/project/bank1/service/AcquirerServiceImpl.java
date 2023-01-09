@@ -18,15 +18,13 @@ public class AcquirerServiceImpl implements AcquirerService {
     private BankService bankService;
     @Autowired
     private AcquirerRepository acquirerRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     public AcquirerDto register(AcquirerDto dto) {
         loggerService.infoLog(String.format("Registering acquirer with merchant ID: {} and merchant password: {}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
         Acquirer acquirer = new Acquirer();
         acquirer.setMerchantId(dto.getMerchantId());
-        // TODO SD: passwordEncoder.encode - pass
+        // TODO SD: base64 encode?
         acquirer.setMerchantPassword(dto.getMerchantPassword());
         Bank bank = bankService.findByName(dto.getBank().getName());
         if (bank == null) {
