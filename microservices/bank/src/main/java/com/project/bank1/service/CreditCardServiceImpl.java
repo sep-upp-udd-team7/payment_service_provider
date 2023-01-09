@@ -61,7 +61,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         RequestDto request = creditCardService.validateAcquirer(dto);
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
-        System.out.println("na ovaj url ce da ide: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
+        System.out.println("Url for redirecting: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
         try {
             ResponseEntity<AcquirerResponseDto> response = webClient.post()
                     .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
@@ -96,12 +96,16 @@ public class CreditCardServiceImpl implements CreditCardService {
         System.out.println("Payment id: " + dto.getPaymentId());
 
         Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
+        System.out.println("Transaction finding....");
         if (t == null) {
             System.out.println(String.format("Transaction with payment ID: %s not found", dto.getPaymentId()));
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
             throw new Exception(errorPaymentUrl);
         }
+        System.out.println("Transaction found.....");
+        System.out.println("Transaction status:" + dto.getTransactionStatus());
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
+        transactionService.save(t); //TODO:DODATO
         return getRedirectionUrl(dto.getTransactionStatus(), t);
     }
 

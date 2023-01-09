@@ -19,16 +19,19 @@ public class AcquirerServiceImpl implements AcquirerService {
 
     public AcquirerDto register(AcquirerDto dto) {
         //TODO KS: dodati provjeru ako vec postoji acquirer da ga ne dodaje opet jer je automatski dodat na banku prilikom dodavanja qr code opcije
-        Acquirer acquirer = new Acquirer();
-        acquirer.setMerchantId(dto.getMerchantId());
-        acquirer.setMerchantPassword(dto.getMerchantPassword());
-        Bank bank = bankService.findByName(dto.getBank().getName());
-        if (bank == null) {
-            System.out.println("Bank " + dto.getBank().getName() + " not found");
-            return null;
+        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if(acquirer == null){
+            acquirer = new Acquirer();
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            if (bank == null) {
+                System.out.println("Bank " + dto.getBank().getName() + " not found");
+                return null;
+            }
+            acquirer.setBank(bank);
+            acquirerRepository.save(acquirer);
         }
-        acquirer.setBank(bank);
-        acquirerRepository.save(acquirer);
 
         Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
         if (a == null) {
