@@ -35,13 +35,16 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public RequestDto validateAcquirer(OnboardingRequestDto dto) throws Exception {
+        loggerService.infoLog(String.format("Validating acquirer by merchant ID: {} for merchant order ID: {}",
+                dto.getMerchantId(), dto.getMerchantOrderId()));
         String pspFrontendUrl = env.getProperty("psp.frontend");
+
         // TODO SD: na auth service-a izvuci merchant id
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         if(acquirer == null) {
-            String msg = "Merchant's credentials are incorrect or merchant is not registered";
-            loggerService.invalidMerchantCredentials(dto.getMerchantId());
-            throw new Exception(msg);
+            String message = String.format("Merchant's credentials are incorrect (ID: {}) or merchant is not registered", dto.getMerchantId());
+            loggerService.errorLog(message);
+            throw new Exception(message);
         }
         RequestDto request = new RequestDto();
         request.setAmount(dto.getAmount());
@@ -53,16 +56,21 @@ public class CreditCardServiceImpl implements CreditCardService {
         request.setFailedUrl(pspFrontendUrl + env.getProperty("psp.failed-payment"));
         request.setErrorUrl(pspFrontendUrl + env.getProperty("psp.error-payment"));
         request.setQrCode(dto.getQrCode());
+        loggerService.successLog(String.format("Successfully validated acquirer (ID: {}) ", dto.getMerchantId()));
         return request;
     }
 
     @Override
     public AcquirerResponseDto startPayment(OnboardingRequestDto dto) throws Exception {
-        RequestDto request = creditCardService.validateAcquirer(dto);
+        loggerService.infoLog(String.format("Stating payment by merchant ID: {}", dto.getMerchantId()));
+        RequestDto request = validateAcquirer(dto);
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
         System.out.println("Url for redirecting: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
         try {
+            loggerService.infoLog(String.format("Sending POST request to bank application on URL: {}",
+                    acquirer.getBank().getBankUrl() + validateIssuerEndpoint));
+
             ResponseEntity<AcquirerResponseDto> response = webClient.post()
                     .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
                     .body(BodyInserters.fromValue(request))
@@ -72,17 +80,19 @@ public class CreditCardServiceImpl implements CreditCardService {
                     .block();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Error transaction!!!!");
+                loggerService.errorLog(String.format("Error transaction! Response status code from bank application is {}", response.getStatusCode()));
                 transaction.setStatus(TransactionStatus.ERROR);
                 transactionService.save(transaction);
                 String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
                 throw new Exception(errorPaymentUrl);
             }
+            loggerService.successLog(String.format("Successful transaction with payment ID: {}", response.getBody().getPaymentId()));
             transaction.setPaymentId(response.getBody().getPaymentId());
             transactionService.save(transaction);
             return getAcquirerResponseDtoWhenResponseIsSuccessful(response);
         } catch (Exception e) {
-            // ako aplikacija banke nije dostupna
+            loggerService.errorLog(String.format("An error occurred while sending an HTTP request to bank application " +
+                    "{}", acquirer.getBank().getBankUrl() + validateIssuerEndpoint));
             transaction.setStatus(TransactionStatus.ERROR);
             transactionService.save(transaction);
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
@@ -92,13 +102,11 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public String finishPayment(ResponseDto dto) throws Exception {
-        System.out.println("Finish payment....");
-        System.out.println("Payment id: " + dto.getPaymentId());
-
+        loggerService.infoLog(String.format("Starting finish payment with payment ID: {}", dto.getPaymentId()));
         Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
         System.out.println("Transaction finding....");
         if (t == null) {
-            System.out.println(String.format("Transaction with payment ID: %s not found", dto.getPaymentId()));
+            loggerService.errorLog(String.format(String.format("Transaction with payment ID: %s not found", dto.getPaymentId())));
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
             throw new Exception(errorPaymentUrl);
         }
@@ -106,6 +114,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         System.out.println("Transaction status:" + dto.getTransactionStatus());
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
         transactionService.save(t); //TODO:DODATO
+        loggerService.successLog(String.format("Successfully finished payment with payment ID: {}", dto.getPaymentId()));
         return getRedirectionUrl(dto.getTransactionStatus(), t);
     }
 

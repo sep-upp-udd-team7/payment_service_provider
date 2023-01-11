@@ -20,6 +20,8 @@ public class WebShop extends Model{
 
     private String shopId;
 
+    private String shopSecret;
+
     private String successUrl;
 
     private String cancelUrl;

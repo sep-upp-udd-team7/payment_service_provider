@@ -11,11 +11,23 @@ public class LoggerService {
         this.logger = LogManager.getLogger(parentClass);
     }
 
-    public void validateAcquirer(String merchantId, String merchantOrderId) {
-        logger.info("Validating acquirer. Merchant ID: {} with order ID: {}", merchantId, merchantOrderId);
+    public void infoLog(String message) {
+        logger.info(message);
     }
 
-    public void invalidMerchantCredentials(String merchantId) {
-        logger.error("Merchant's credentials are incorrect (ID: {}) or merchant is not registered", merchantId);
+    public void debugLog(String message) {
+        logger.debug(message);
+    }
+
+    public void warnLog(String message) {
+        logger.warn(message);
+    }
+
+    public void successLog(String message) {
+        logger.info(message);
+    }
+
+    public void errorLog(String message) {
+        logger.error(message);
     }
 }

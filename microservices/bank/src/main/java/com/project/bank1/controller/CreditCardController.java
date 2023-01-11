@@ -20,7 +20,9 @@ public class CreditCardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/startPayment")
     public ResponseEntity<?> startPayment(@RequestBody OnboardingRequestDto dto){
-        loggerService.validateAcquirer(dto.getMerchantId(), dto.getMerchantOrderId());
+        String message = String.format("Start payment by validating acquirer. Merchant ID: {} with order ID: {}",
+                dto.getMerchantId(), dto.getMerchantOrderId());
+        loggerService.infoLog(message);
         try {
             return new ResponseEntity<>(creditCardService.startPayment(dto), HttpStatus.OK);
         } catch (Exception e) {
@@ -30,6 +32,8 @@ public class CreditCardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/finishPayment")
     public ResponseEntity<?> finishPayment(@RequestBody ResponseDto dto){
+        loggerService.infoLog(String.format("Finishing payment by validating acquirer. Merchant order ID: {}",
+                dto.getMerchantOrderId()));
         try {
             return new ResponseEntity<String>(creditCardService.finishPayment(dto), HttpStatus.OK);
         } catch (Exception e) {
