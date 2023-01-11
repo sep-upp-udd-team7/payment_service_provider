@@ -55,6 +55,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         request.setSuccessUrl(pspFrontendUrl + env.getProperty("psp.success-payment"));
         request.setFailedUrl(pspFrontendUrl + env.getProperty("psp.failed-payment"));
         request.setErrorUrl(pspFrontendUrl + env.getProperty("psp.error-payment"));
+        request.setQrCode(dto.getQrCode());
         loggerService.successLog(String.format("Successfully validated acquirer (ID: {}) ", dto.getMerchantId()));
         return request;
     }
@@ -65,7 +66,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         RequestDto request = validateAcquirer(dto);
         Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
-
+        System.out.println("Url for redirecting: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
         try {
             loggerService.infoLog(String.format("Sending POST request to bank application on URL: {}",
                     acquirer.getBank().getBankUrl() + validateIssuerEndpoint));
@@ -103,12 +104,16 @@ public class CreditCardServiceImpl implements CreditCardService {
     public String finishPayment(ResponseDto dto) throws Exception {
         loggerService.infoLog(String.format("Starting finish payment with payment ID: {}", dto.getPaymentId()));
         Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
+        System.out.println("Transaction finding....");
         if (t == null) {
             loggerService.errorLog(String.format(String.format("Transaction with payment ID: %s not found", dto.getPaymentId())));
             String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
             throw new Exception(errorPaymentUrl);
         }
+        System.out.println("Transaction found.....");
+        System.out.println("Transaction status:" + dto.getTransactionStatus());
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
+        transactionService.save(t); //TODO:DODATO
         loggerService.successLog(String.format("Successfully finished payment with payment ID: {}", dto.getPaymentId()));
         return getRedirectionUrl(dto.getTransactionStatus(), t);
     }

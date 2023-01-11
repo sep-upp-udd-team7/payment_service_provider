@@ -7,4 +7,6 @@ public interface AcquirerService {
     AcquirerDto register(AcquirerDto dto);
 
     Acquirer findByMerchantId(String merchantId);
+
+    AcquirerDto registerQrCode(AcquirerDto dto);
 }

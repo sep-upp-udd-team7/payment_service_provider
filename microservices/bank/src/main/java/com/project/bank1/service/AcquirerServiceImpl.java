@@ -20,19 +20,23 @@ public class AcquirerServiceImpl implements AcquirerService {
     private AcquirerRepository acquirerRepository;
 
     public AcquirerDto register(AcquirerDto dto) {
+
         loggerService.infoLog(String.format("Registering acquirer with merchant ID: {} and merchant password: {}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
-        Acquirer acquirer = new Acquirer();
-        acquirer.setMerchantId(dto.getMerchantId());
-        // TODO SD: base64 encode?
-        acquirer.setMerchantPassword(dto.getMerchantPassword());
-        Bank bank = bankService.findByName(dto.getBank().getName());
-        if (bank == null) {
-            loggerService.errorLog(String.format("Bank with name {} not found!", dto.getBank().getName()));
-            return null;
+        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if(acquirer == null){
+            acquirer = new Acquirer();
+            acquirer.setMerchantId(dto.getMerchantId());
+            // TODO SD: base64 encode?
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            if (bank == null) {
+                loggerService.errorLog(String.format("Bank with name {} not found!", dto.getBank().getName()));
+                return null;
+            }
+            acquirer.setBank(bank);
+            acquirerRepository.save(acquirer);
         }
-        acquirer.setBank(bank);
-        acquirerRepository.save(acquirer);
 
         Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
         if (a == null) {
@@ -55,5 +59,34 @@ public class AcquirerServiceImpl implements AcquirerService {
         }
         loggerService.errorLog(String.format("Acquirer by merchant ID: {} not found", merchantId));
         return null;
+    }
+
+    @Override
+    public AcquirerDto registerQrCode(AcquirerDto dto) {
+        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if(acquirer == null){
+            acquirer  = new Acquirer();
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            if (bank == null) {
+                System.out.println("Bank " + dto.getBank().getName() + " not found");
+                return null;
+            }
+            acquirer.setBank(bank);
+            acquirer.setQrCodePayment(true);
+        }else{
+            acquirer.setQrCodePayment(true);
+        }
+        acquirerRepository.save(acquirer);
+
+        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if (a == null) {
+            System.out.println("ACQUIRER with merchant id " + dto.getMerchantId() + " not found");
+            return null;
+        }
+        dto.setId(a.getId());
+        dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
+        return dto;
     }
 }

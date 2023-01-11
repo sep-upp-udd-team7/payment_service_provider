@@ -25,6 +25,9 @@ public class Acquirer {
     @JoinColumn(name = "bank_id")
     private Bank bank;
 
+    @Column(name = "qrCodePayment")
+    private Boolean qrCodePayment = false;
+
     @OneToMany(mappedBy = "acquirer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Transaction> transactions = new HashSet<>();
 }
