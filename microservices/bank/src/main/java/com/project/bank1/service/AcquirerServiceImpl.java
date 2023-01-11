@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,6 +31,39 @@ public class AcquirerServiceImpl implements AcquirerService {
     public AcquirerDto register(AcquirerDto dto) {
         loggerService.infoLog(MessageFormat.format("Registering acquirer with merchant ID: {0} and merchant password: {1}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
+
+        ResponseEntity<String> bankResponse = sendRequestForApiKeyToBank(dto);
+        if (!bankResponse.getStatusCode().is2xxSuccessful()) {
+            loggerService.errorLog("Invalid merchant credentials or bank is unavailable");
+            return null;
+        }
+
+        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if (acquirer == null) {
+            acquirer = new Acquirer();
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            acquirer.setApiKey(bankResponse.getBody());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            if (bank == null) {
+                loggerService.errorLog(MessageFormat.format("Bank with name {0} not found!", dto.getBank().getName()));
+                return null;
+            }
+            acquirer.setBank(bank);
+            acquirerRepository.save(acquirer);
+        }
+        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        if (a == null) {
+            loggerService.errorLog(MessageFormat.format("Acquirer with merchant ID {0} not found!", dto.getMerchantId()));
+            return null;
+        }
+        dto.setId(a.getId());
+        dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
+        loggerService.successLog(MessageFormat.format("Created acquirer with ID: {0}", a.getId()));
+        return dto;
+    }
+
+    private ResponseEntity<String> sendRequestForApiKeyToBank(AcquirerDto dto) {
         String bankBackendUrl = bankService.findByName(dto.getBank().getName()).getBankUrl() + env.getProperty("bank.access-token");
         loggerService.infoLog(MessageFormat.format("Sending request to bank with URL: {0}", bankBackendUrl));
 
@@ -43,39 +75,7 @@ public class AcquirerServiceImpl implements AcquirerService {
                 .retrieve()
                 .toEntity(String.class)
                 .block();
-
-        if (bankResponse.getStatusCode().is2xxSuccessful()) {
-            System.out.println("**********************");
-            System.out.println(bankResponse.getBody());
-            System.out.println("**********************");
-            Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
-            if (acquirer == null) {
-                acquirer = new Acquirer();
-                acquirer.setMerchantId(dto.getMerchantId());
-                // TODO SD: base64 encode?
-                acquirer.setMerchantPassword(dto.getMerchantPassword());
-                Bank bank = bankService.findByName(dto.getBank().getName());
-                if (bank == null) {
-                    loggerService.errorLog(MessageFormat.format("Bank with name {0} not found!", dto.getBank().getName()));
-                    return null;
-                }
-                acquirer.setBank(bank);
-                acquirerRepository.save(acquirer);
-            }
-
-            Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
-            if (a == null) {
-                loggerService.errorLog(MessageFormat.format("Acquirer with merchant ID {0} not found!", dto.getMerchantId()));
-                return null;
-            }
-            dto.setId(a.getId());
-            dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
-            loggerService.successLog(MessageFormat.format("Created acquirer with ID: {0}", a.getId()));
-            return dto;
-        } else {
-            loggerService.errorLog("Invalid merchant credentials or bank is unavailable");
-            return null;
-        }
+        return bankResponse;
     }
 
     private MerchantCredentialsDto getMerchantCredentials(AcquirerDto acquirer) {

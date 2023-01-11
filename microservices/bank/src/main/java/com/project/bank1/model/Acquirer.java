@@ -30,4 +30,6 @@ public class Acquirer {
 
     @OneToMany(mappedBy = "acquirer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Transaction> transactions = new HashSet<>();
+
+    private String apiKey;
 }
