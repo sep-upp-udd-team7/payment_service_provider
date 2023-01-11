@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+
 @Service
 public class AcquirerServiceImpl implements AcquirerService {
     private LoggerService loggerService = new LoggerService(this.getClass());
@@ -20,8 +22,7 @@ public class AcquirerServiceImpl implements AcquirerService {
     private AcquirerRepository acquirerRepository;
 
     public AcquirerDto register(AcquirerDto dto) {
-
-        loggerService.infoLog(String.format("Registering acquirer with merchant ID: {} and merchant password: {}",
+        loggerService.infoLog(MessageFormat.format("Registering acquirer with merchant ID: {0} and merchant password: {1}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
         Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
         if(acquirer == null){
@@ -31,7 +32,7 @@ public class AcquirerServiceImpl implements AcquirerService {
             acquirer.setMerchantPassword(dto.getMerchantPassword());
             Bank bank = bankService.findByName(dto.getBank().getName());
             if (bank == null) {
-                loggerService.errorLog(String.format("Bank with name {} not found!", dto.getBank().getName()));
+                loggerService.errorLog(MessageFormat.format("Bank with name {0} not found!", dto.getBank().getName()));
                 return null;
             }
             acquirer.setBank(bank);
@@ -40,24 +41,24 @@ public class AcquirerServiceImpl implements AcquirerService {
 
         Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
         if (a == null) {
-            loggerService.errorLog(String.format("Acquirer with merchant ID {} not found!", dto.getMerchantId()));
+            loggerService.errorLog(MessageFormat.format("Acquirer with merchant ID {0} not found!", dto.getMerchantId()));
             return null;
         }
         dto.setId(a.getId());
         dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
-        loggerService.successLog(String.format("Created acquirer with ID: {}", a.getId()));
+        loggerService.successLog(MessageFormat.format("Created acquirer with ID: {0}", a.getId()));
         return dto;
     }
 
     public Acquirer findByMerchantId(String merchantId) {
-        loggerService.infoLog(String.format("Finding acquirer by merchant ID: {}", merchantId));
+        loggerService.infoLog(MessageFormat.format("Finding acquirer by merchant ID: {0}", merchantId));
         for (Acquirer a: acquirerRepository.findAll()) {
             if (a.getMerchantId().equals(merchantId)) {
-                loggerService.successLog(String.format("Found acquirer with ID: {}", a.getId()));
+                loggerService.successLog(MessageFormat.format("Found acquirer with ID: {0}", a.getId()));
                 return a;
             }
         }
-        loggerService.errorLog(String.format("Acquirer by merchant ID: {} not found", merchantId));
+        loggerService.errorLog(MessageFormat.format("Acquirer by merchant ID: {0} not found", merchantId));
         return null;
     }
 

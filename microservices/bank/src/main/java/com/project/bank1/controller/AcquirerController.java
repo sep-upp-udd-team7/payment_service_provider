@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.MessageFormat;
+
 @RestController
 @RequestMapping(value = "/acquirers",
         produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -23,7 +25,7 @@ public class AcquirerController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/register")
     public ResponseEntity<?> register(@RequestBody AcquirerDto dto){
-        loggerService.infoLog(String.format("Registering new acquirer with merchant ID {} in bank {}", dto.getMerchantId(), dto.getBank().getName() ));
+        loggerService.infoLog(MessageFormat.format("Registering new acquirer with merchant ID {0} in bank {1}", dto.getMerchantId(), dto.getBank().getName() ));
         AcquirerDto response = acquirerService.register(dto);
         if (response == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
