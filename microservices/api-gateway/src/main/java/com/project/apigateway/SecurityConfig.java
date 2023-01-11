@@ -28,7 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth-service/generate-jwt","/auth-service/decode-token")
+                .antMatchers("/auth-service/generate-jwt","/auth-service/decode-token",
+                        "/bank-service/banks/getAll", "/bank-service/acquirers/register", "/bank-service/acquirers/registerQrCode", "/bank-service/credit-cards/startPayment", "/bank-service/credit-cards/finishPayment", "/bank-service/test1")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
