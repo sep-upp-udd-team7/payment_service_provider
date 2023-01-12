@@ -76,6 +76,9 @@ public class CreditCardServiceImpl implements CreditCardService {
             ResponseEntity<AcquirerResponseDto> response = webClient.post()
                     .uri(acquirer.getBank().getBankUrl() + validateIssuerEndpoint)
                     .body(BodyInserters.fromValue(request))
+                    .headers(httpHeaders -> {
+                        httpHeaders.set("Connection", "Bearer " + acquirer.getApiKey());
+                    })
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toEntity(AcquirerResponseDto.class)
@@ -88,7 +91,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
                 throw new Exception(errorPaymentUrl);
             }
-            loggerService.successLog(MessageFormat.format("Successful transaction with payment ID: {0}", response.getBody().getPaymentId()));
+            loggerService.successLog(MessageFormat.format("Successfully started transaction with payment ID: {0}", response.getBody().getPaymentId()));
             transaction.setPaymentId(response.getBody().getPaymentId());
             transactionService.save(transaction);
             return getAcquirerResponseDtoWhenResponseIsSuccessful(response);
@@ -106,17 +109,13 @@ public class CreditCardServiceImpl implements CreditCardService {
     public String finishPayment(ResponseDto dto) throws Exception {
         loggerService.infoLog(MessageFormat.format("Starting finish payment with payment ID: {0}", dto.getPaymentId()));
         Transaction t = transactionService.findByPaymentId(dto.getPaymentId());
-        System.out.println("Transaction finding....");
         if (t == null) {
             loggerService.errorLog(MessageFormat.format("Transaction with payment ID: {0} not found", dto.getPaymentId()));
-            String errorPaymentUrl = env.getProperty("psp.frontend") + env.getProperty("psp.error-payment");
-            throw new Exception(errorPaymentUrl);
+            throw new Exception(env.getProperty("psp.frontend") + env.getProperty("psp.error-payment"));
         }
-        System.out.println("Transaction found.....");
-        System.out.println("Transaction status:" + dto.getTransactionStatus());
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
         transactionService.save(t); //TODO:DODATO
-        loggerService.successLog(MessageFormat.format("Successfully finished payment with payment ID: {0}", dto.getPaymentId()));
+        loggerService.infoLog(MessageFormat.format("Transaction is: {0} with payment ID: {1}", dto.getTransactionStatus(), dto.getPaymentId()));
         return getRedirectionUrl(dto.getTransactionStatus(), t);
     }
 

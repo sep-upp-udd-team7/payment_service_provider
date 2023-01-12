@@ -40,7 +40,7 @@ public class TestController {
         ResponseEntity<ApiKeyDto> response = webClient.post()
                 .uri( bankBackendUl + "/api-keys")
                 .headers(httpHeaders -> {
-                    httpHeaders.set("ApiKey", header);
+                    httpHeaders.set("Connection", header);
                 })
                 .body(BodyInserters.fromValue(api))
                 .accept(MediaType.APPLICATION_JSON)

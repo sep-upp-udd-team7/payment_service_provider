@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.MessageFormat;
+
 @RestController
 @RequestMapping(value = "/credit-cards", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CreditCardController {
@@ -20,9 +22,8 @@ public class CreditCardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/startPayment")
     public ResponseEntity<?> startPayment(@RequestBody OnboardingRequestDto dto){
-        String message = String.format("Start payment by validating acquirer. Merchant ID: {} with order ID: {}",
-                dto.getMerchantId(), dto.getMerchantOrderId());
-        loggerService.infoLog(message);
+        loggerService.infoLog(MessageFormat.format("Start payment by validating acquirer. Merchant ID: {0} with order ID: {1}",
+                dto.getMerchantId(), dto.getMerchantOrderId()));
         try {
             return new ResponseEntity<>(creditCardService.startPayment(dto), HttpStatus.OK);
         } catch (Exception e) {
@@ -32,7 +33,7 @@ public class CreditCardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/finishPayment")
     public ResponseEntity<?> finishPayment(@RequestBody ResponseDto dto){
-        loggerService.infoLog(String.format("Finishing payment by validating acquirer. Merchant order ID: {}",
+        loggerService.infoLog(MessageFormat.format("Finishing payment by validating acquirer. Merchant order ID: {0}",
                 dto.getMerchantOrderId()));
         try {
             return new ResponseEntity<String>(creditCardService.finishPayment(dto), HttpStatus.OK);
