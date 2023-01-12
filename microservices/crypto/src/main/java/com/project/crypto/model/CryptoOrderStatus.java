@@ -3,6 +3,11 @@ package com.project.crypto.model;
 public enum CryptoOrderStatus {
     NEW,
     PAID,
-    CANCELLED,
-    EXPIRED
+    CANCELED,
+    EXPIRED,
+    PENDING,
+    CONFIRMING,
+    INVALID,
+    REFUNDED,
+    PARTIALLY_REFUNDED
 }

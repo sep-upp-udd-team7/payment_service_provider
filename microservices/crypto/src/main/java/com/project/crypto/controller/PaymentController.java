@@ -3,6 +3,7 @@ package com.project.crypto.controller;
 import com.project.crypto.dto.CancelPaymentResponseDto;
 import com.project.crypto.dto.ConfirmPaymentResponseDto;
 import com.project.crypto.dto.CreateOrderDto;
+import com.project.crypto.dto.OrderStatusDto;
 import com.project.crypto.model.CreateOrderResponse;
 import com.project.crypto.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -36,4 +37,9 @@ public class PaymentController {
         return new ResponseEntity<ConfirmPaymentResponseDto>(confirmPaymentResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/get-order-status/{id}")
+    public ResponseEntity<OrderStatusDto> getOrderStatus(@PathVariable("id") String orderId){
+        OrderStatusDto orderStatusDto = paymentService.getOrderStatus(orderId);
+        return new ResponseEntity<OrderStatusDto>(orderStatusDto, HttpStatus.OK);
+    }
 }
