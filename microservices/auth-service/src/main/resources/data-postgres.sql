@@ -26,3 +26,11 @@ VALUES (1, 1);
 INSERT INTO public.web_shop_payment_method(
 shop_id, payment_method_id)
 VALUES (1, 2);
+
+INSERT INTO public.web_shop_payment_method(
+shop_id, payment_method_id)
+VALUES (1, 3);
+
+INSERT INTO public.web_shop_payment_method(
+shop_id, payment_method_id)
+VALUES (1, 4);
