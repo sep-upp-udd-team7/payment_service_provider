@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface SubscriptionRepository extends EntityRepository<Subscription> {
 
     @Query("SELECT s FROM Subscription s WHERE s.token=?1")
-    public Subscription getSubscriptionByToken(String token);
+    Subscription getSubscriptionByToken(String token);
 }

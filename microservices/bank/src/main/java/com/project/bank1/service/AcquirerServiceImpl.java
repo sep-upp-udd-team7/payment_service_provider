@@ -1,6 +1,7 @@
 package com.project.bank1.service;
 
 import com.project.bank1.dto.AcquirerDto;
+import com.project.bank1.dto.OperationResponse;
 import com.project.bank1.mapper.BankMapper;
 import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Bank;
@@ -8,7 +9,6 @@ import com.project.bank1.repository.AcquirerRepository;
 import com.project.bank1.service.interfaces.AcquirerService;
 import com.project.bank1.service.interfaces.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,10 +23,12 @@ public class AcquirerServiceImpl implements AcquirerService {
 
         loggerService.infoLog(String.format("Registering acquirer with merchant ID: {} and merchant password: {}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
-        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        Acquirer acquirer = acquirerRepository.getByShopId(dto.getShopId());
         if(acquirer == null){
             acquirer = new Acquirer();
             acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setShopId(dto.getShopId());
+            acquirer.setBankPayment(true);
             // TODO SD: base64 encode?
             acquirer.setMerchantPassword(dto.getMerchantPassword());
             Bank bank = bankService.findByName(dto.getBank().getName());
@@ -38,7 +40,7 @@ public class AcquirerServiceImpl implements AcquirerService {
             acquirerRepository.save(acquirer);
         }
 
-        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
         if (a == null) {
             loggerService.errorLog(String.format("Acquirer with merchant ID {} not found!", dto.getMerchantId()));
             return null;
@@ -63,11 +65,12 @@ public class AcquirerServiceImpl implements AcquirerService {
 
     @Override
     public AcquirerDto registerQrCode(AcquirerDto dto) {
-        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        Acquirer acquirer = acquirerRepository.getByShopId(dto.getShopId());
         if(acquirer == null){
             acquirer  = new Acquirer();
             acquirer.setMerchantId(dto.getMerchantId());
             acquirer.setMerchantPassword(dto.getMerchantPassword());
+
             Bank bank = bankService.findByName(dto.getBank().getName());
             if (bank == null) {
                 System.out.println("Bank " + dto.getBank().getName() + " not found");
@@ -80,7 +83,7 @@ public class AcquirerServiceImpl implements AcquirerService {
         }
         acquirerRepository.save(acquirer);
 
-        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+        Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
         if (a == null) {
             System.out.println("ACQUIRER with merchant id " + dto.getMerchantId() + " not found");
             return null;
@@ -88,5 +91,43 @@ public class AcquirerServiceImpl implements AcquirerService {
         dto.setId(a.getId());
         dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
         return dto;
+    }
+
+    @Override
+    public OperationResponse removeQrCode(String shopId) {
+        Acquirer acquirer=acquirerRepository.getByShopId(shopId);
+        if (acquirer!=null){
+            acquirer.setQrCodePayment(false);
+            acquirerRepository.save(acquirer);
+            if (!acquirer.getBankPayment()){
+                acquirerRepository.delete(acquirer);
+            }
+            OperationResponse response=new OperationResponse();
+            response.setOperationResponse(true);
+            return response;
+        }
+        OperationResponse response=new OperationResponse();
+        response.setOperationResponse(false);
+        return response;
+    }
+
+    public OperationResponse removeBankPayment(String shopId){
+        Acquirer acquirer=acquirerRepository.getByShopId(shopId);
+        if (acquirer!=null){
+            if (!acquirer.getQrCodePayment()){
+                acquirerRepository.delete(acquirer);
+                OperationResponse response=new OperationResponse();
+                response.setOperationResponse(true);
+                return response;
+            }
+            acquirer.setBankPayment(false);
+            acquirerRepository.save(acquirer);
+            OperationResponse response=new OperationResponse();
+            response.setOperationResponse(true);
+            return response;
+        }
+        OperationResponse response=new OperationResponse();
+        response.setOperationResponse(false);
+        return response;
     }
 }
