@@ -24,7 +24,8 @@ import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
-public class JwtRequestFilter extends OncePerRequestFilter {
+public class JwtRequestFilter extends OncePerRequestFilter{
+
 
 
     @Override

@@ -39,6 +39,7 @@ public class AuthService {
             dto.setClientSecret(shop.getShopSecret());
             return dto;
         } catch (Exception e) {
+            e.printStackTrace();
             return new TokenValidationResponseDto(null, null);
         }
 

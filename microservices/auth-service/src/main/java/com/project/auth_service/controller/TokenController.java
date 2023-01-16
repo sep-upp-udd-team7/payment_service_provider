@@ -24,7 +24,7 @@ import java.util.Base64;
 public class TokenController {
 
     private final AuthService authService;
-    @PostMapping("/generate-token")
+    @PostMapping("/generate-url-token")
     public TokenDto generateUrlToken(@RequestBody TransactionData transactionSensitiveData) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper(); // or use an existing one
         String json = objectMapper.writeValueAsString(transactionSensitiveData);
@@ -36,7 +36,7 @@ public class TokenController {
         return token;
     }
 
-    @PostMapping("/decode-token")
+    @PostMapping("/decode-url-token")
     public TransactionData decodeUrlToken(@RequestBody TokenDto token) throws JsonProcessingException {
         String userJsonBase64 = Jwts.parser().setSigningKey("secret").parseClaimsJws(token.getToken()).getBody().get("transactionData", String.class);
         byte [] bytes = Base64.getDecoder().decode(userJsonBase64);

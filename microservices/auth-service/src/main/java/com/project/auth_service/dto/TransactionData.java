@@ -11,4 +11,6 @@ public class TransactionData {
 
     private String transactionId;
 
+    private String accessToken;
+
 }
