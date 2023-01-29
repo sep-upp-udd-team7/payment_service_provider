@@ -51,6 +51,16 @@ public class WebShopService {
 
     public OperationResponse addPaymentMethod(AddPaymentMethodDto dto){
         PaymentMethod paymentMethod=paymentMethodRepository.get(dto.getPaymentMethodId());
+        if (paymentMethod.getName().equalsIgnoreCase("BANK") || paymentMethod.getName().equalsIgnoreCase("QR_CODE")){
+            WebShop shop=shopRepository.getShopById(dto.getShopId());
+            Set<PaymentMethod> paymentMethodSet=shop.getPaymentMethods();
+            paymentMethodSet.add(paymentMethod);
+            shop.setPaymentMethods(paymentMethodSet);
+            shopRepository.save(shop);
+            OperationResponse response=new OperationResponse();
+            response.setOperationResponse(true);
+            return response;
+        }
         WebClient webClient = WebClient.create();
 
         SubscribeWebShopToPaymentMethodRequest requestDto=new SubscribeWebShopToPaymentMethodRequest();
@@ -124,8 +134,8 @@ public class WebShopService {
     private String resolveServiceUrl(PaymentMethod paymentMethod) {
         switch (paymentMethod.getName()){
             case "PAYPAL": return "http://localhost:8084/unsubscribe-web-shop";
-            case "BANK": return "http://localhost:8080/unsubscribe-web-shop";
-            case "QR_CODE": return "http://localhost:8080/unsubscribe-web-shop";
+            case "BANK": return "http://localhost:8080/acquirers/remove-bank-payment";
+            case "QR_CODE": return "http://localhost:8080/acquirers/remove-qrcode";
             case "CRYPTO": return "http://localhost:8082/unsubscribe-web-shop";
         }
         return "";

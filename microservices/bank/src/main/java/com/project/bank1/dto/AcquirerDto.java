@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AcquirerDto {
     private Long id;
+    private String shopId;
     private String merchantId;
     private String merchantPassword;
     private BankDto bank;
