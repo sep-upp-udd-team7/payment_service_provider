@@ -31,3 +31,12 @@ eureka:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
 
+coingate:
+  api: https://api-sandbox.coingate.com/api/v2
+
+webshop:
+  url:
+    success: http://localhost:4201/success/
+    cancel: http://localhost:4201/cancel/
+
+pspfront: http://localhost:4200
