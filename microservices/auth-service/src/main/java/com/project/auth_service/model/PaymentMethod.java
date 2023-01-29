@@ -14,6 +14,8 @@ public class PaymentMethod extends Model{
 
     private String name;
 
+    private String addPaymentMethodUrl;
+
     @ManyToMany(mappedBy = "paymentMethods")
     private Set<WebShop> webShops;
 }
