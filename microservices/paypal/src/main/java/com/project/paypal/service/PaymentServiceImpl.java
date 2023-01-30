@@ -27,11 +27,12 @@ import java.util.List;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    @Autowired
-    private static Environment environment;
 
-    private static final String cancelURL = environment.getProperty("psp.url") + "cancel-paypal-payment";
-    private static final String returnURL = environment.getProperty("psp.url") + "paypal-payment-processing/";
+    @Autowired
+    private Environment environment;
+
+//    private  String cancelURL = environment.getProperty("psp.url") + "cancel-paypal-payment";
+//    private  String returnURL = environment.getProperty("psp.url") + "paypal-payment-processing/";
     private final LocalTransactionRepository transactionRepository;
     private final APIContext apiContext;
     private LoggerService loggerService = new LoggerService(this.getClass());
@@ -43,8 +44,8 @@ public class PaymentServiceImpl implements PaymentService {
         LocalTransaction localTransaction = createLocalTransaction(createPaymentDto.getAmount(),createPaymentDto.getTransactionId());
 
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(cancelURL + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
-        redirectUrls.setReturnUrl(returnURL + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
+        redirectUrls.setCancelUrl( environment.getProperty("psp.url") + "cancel-paypal-payment" + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
+        redirectUrls.setReturnUrl(environment.getProperty("psp.url") + "paypal-payment-processing/" + "?transaction_id=" + localTransaction.getTransactionId()+"&"+"shop_id="+createPaymentDto.getShopId());
         payment.setRedirectUrls(redirectUrls);
         apiContext.setMaskRequestId(true);
 

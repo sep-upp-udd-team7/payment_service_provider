@@ -27,11 +27,11 @@ jwt:
 
 server:
   port: 8083
-  ssl:
-    key-store: classpath:local-ssl.p12
-    key-store-password: password
-    keyStoreType: PKCS12
-    keyAlias: local_ssl
+#  ssl:
+#    key-store: classpath:local-ssl.p12
+#    key-store-password: password
+#    keyStoreType: PKCS12
+#    keyAlias: local_ssl
 
 eureka:
   client:

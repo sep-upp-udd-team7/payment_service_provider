@@ -136,7 +136,7 @@ public class WebShopService {
 
     private String resolveServiceUrl(PaymentMethod paymentMethod) {
         switch (paymentMethod.getName()){
-            case "PAYPAL": return  environment.getProperty("shop.paypal") + "unsubscribe-web-shop";
+            case "PAYPAL": return  "http://localhost:8084/" + "unsubscribe-web-shop";
             case "BANK": return  environment.getProperty("shop.bank") + "acquirers/remove-bank-payment";
             case "QR_CODE": return  environment.getProperty("shop.bank") + "acquirers/remove-qrcode";
             case "CRYPTO": return  environment.getProperty("shop.crypto") + "unsubscribe-web-shop";
