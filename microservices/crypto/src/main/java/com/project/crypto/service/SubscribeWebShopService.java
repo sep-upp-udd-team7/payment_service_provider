@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SubscribeWebShopService {
 
+    private LoggerService loggerService = new LoggerService(this.getClass());
+
     private final MerchantRepository merchantRepository;
     public boolean subscribeWebShop(SubscribeWebShopDto dto) {
         Merchant merchant= merchantRepository.findByMerchantId(dto.getShopId());
@@ -18,8 +20,10 @@ public class SubscribeWebShopService {
             newMerchant.setMerchantId(dto.getShopId());
             newMerchant.setToken(dto.getPaymentApiClientId());
             merchantRepository.save(newMerchant);
+            loggerService.successLog("Successfully subscribed web shop with id: "+dto.getShopId());
             return true;
         }
+        loggerService.errorLog("Web shop with id: "+dto.getShopId()+" already exists");
         return false;
     }
 
@@ -27,8 +31,10 @@ public class SubscribeWebShopService {
         Merchant merchant=merchantRepository.findByMerchantId(shopId);
         if (merchant!=null){
             merchantRepository.delete(merchant);
+            loggerService.successLog("Successfully unsubscribed web shop with id: "+shopId);
             return true;
         }
+        loggerService.errorLog("Web shop with id: "+shopId+" does not exist");
         return false;
     }
 }

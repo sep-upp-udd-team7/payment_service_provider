@@ -28,6 +28,8 @@ public class PaymentService {
     @Autowired
     private CryptoOrderRepository cryptoOrderRepository;
 
+    private LoggerService loggerService = new LoggerService(this.getClass());
+
     @Value("${coingate.api}")
     String urlCoinGate;// = "https://api-sandbox.coingate.com/api/v2";
 
@@ -37,7 +39,7 @@ public class PaymentService {
     public CreateOrderResponse createOrder(CreateOrderDto createOrderDto) {
         System.out.println("coingate URL:" + urlCoinGate);
         //URLEncoder.encode("", StandardCharsets.UTF_8);
-
+        loggerService.infoLog("Request for creating crypto order for transaction: " + createOrderDto.getTransactionId() + " and shop: " + createOrderDto.getShopId());
         Merchant merchant = merchantRepository.findByMerchantId(createOrderDto.getShopId());
 
         StringBuilder body = new StringBuilder();
@@ -65,6 +67,7 @@ public class PaymentService {
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            loggerService.errorLog("Error while sending http request for creating new crypto order with id:"+createOrderDto.getTransactionId()+", for webShop with id:"+createOrderDto.getShopId());
             return null;
         }
 
@@ -76,6 +79,8 @@ public class PaymentService {
         //String orderId, double priceAmount, String priceCurrency, String title, CryptoOrderStatus status, Merchant merchant
         CryptoOrder cryptoOrder = new CryptoOrder(createOrderDto.getTransactionId(), createOrderResponse.getId(),Double.parseDouble(createOrderDto.getAmount()), "EUR", createOrderDto.getShopId(), CryptoOrderStatus.NEW, merchant);
         cryptoOrderRepository.saveAndFlush(cryptoOrder);
+
+        loggerService.successLog("Successfully created new crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+createOrderDto.getShopId());
 
         return createOrderResponse;
 
@@ -90,9 +95,10 @@ public class PaymentService {
         String merchantCallbackLink = merchantCancelCallbackLink + orderId; //"http://localhost:4201/cancel/"
 
         if(cryptoOrder.getStatus() == CryptoOrderStatus.CANCELED){
-            //TODO ? da obavestimo webshop bekend?
+            loggerService.successLog("Successfully canceled crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+cryptoOrder.getMerchant().getMerchantId());
             return new CancelPaymentResponseDto(true, merchantCallbackLink);
         }else{
+            loggerService.errorLog("Error while canceling crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+cryptoOrder.getMerchant().getMerchantId());
             return new CancelPaymentResponseDto(false, "");
         }
     }
@@ -106,8 +112,10 @@ public class PaymentService {
         String merchantCallbackLink = merchantSuccessCallbackLink + orderId; // "http://localhost:4201/success/"
 
         if(cryptoOrder.getStatus() == CryptoOrderStatus.PAID){
+            loggerService.successLog("Successfully confirmed crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+cryptoOrder.getMerchant().getMerchantId());
             return new ConfirmPaymentResponseDto(true, merchantCallbackLink);
         }else{
+            loggerService.errorLog("Error while confirming crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+cryptoOrder.getMerchant().getMerchantId());
             return new ConfirmPaymentResponseDto(false, "");
         }
     }
@@ -141,6 +149,7 @@ public class PaymentService {
                 cryptoOrder.setStatus(CryptoOrderStatus.PARTIALLY_REFUNDED);
             }
             cryptoOrderRepository.saveAndFlush(cryptoOrder);
+            loggerService.successLog("Successfully updated crypto order with id:"+cryptoOrder.getOrderId()+", for webShop with id:"+cryptoOrder.getMerchant().getMerchantId()+" to new status:"+cryptoOrder.getStatus().toString());
             return new OrderStatusDto(cryptoOrder.getStatus().toString(), cryptoOrder.getOrderId(), cryptoOrder.getPriceAmount());
         }
         return null;

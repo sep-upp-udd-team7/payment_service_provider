@@ -5,6 +5,7 @@ import com.project.crypto.dto.ConfirmPaymentResponseDto;
 import com.project.crypto.dto.CreateOrderDto;
 import com.project.crypto.dto.OrderStatusDto;
 import com.project.crypto.model.CreateOrderResponse;
+import com.project.crypto.service.LoggerService;
 import com.project.crypto.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    private LoggerService loggerService = new LoggerService(this.getClass());
 
     @PostMapping("/create-order")
     public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderDto createOrderDto) {
