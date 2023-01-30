@@ -37,5 +37,6 @@ eureka:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
 
-
+psp:
+  url: 'https://localhost:4200/'
 

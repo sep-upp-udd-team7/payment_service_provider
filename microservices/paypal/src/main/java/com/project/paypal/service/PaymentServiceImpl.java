@@ -12,6 +12,8 @@ import com.project.paypal.service.interfaces.PaymentService;
 import com.project.paypal.utils.LogData;
 import com.project.paypal.utils.RandomCharacterGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,8 +27,11 @@ import java.util.List;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    private static final String cancelURL = "http://localhost:4200/cancel-paypal-payment";
-    private static final String returnURL = "http://localhost:4200/paypal-payment-processing/";
+    @Autowired
+    private static Environment environment;
+
+    private static final String cancelURL = environment.getProperty("psp.url") + "cancel-paypal-payment";
+    private static final String returnURL = environment.getProperty("psp.url") + "paypal-payment-processing/";
     private final LocalTransactionRepository transactionRepository;
     private final APIContext apiContext;
     private LoggerService loggerService = new LoggerService(this.getClass());
