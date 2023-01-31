@@ -1,5 +1,6 @@
 package com.project.bank1;
 
+import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Bank;
 import com.project.bank1.repository.AcquirerRepository;
 import com.project.bank1.repository.BankRepository;
@@ -19,6 +20,9 @@ public class BankApplication implements CommandLineRunner {
 	private Environment environment;
 	@Autowired
 	private BankRepository bankRepository;
+
+	@Autowired
+	private AcquirerRepository acquirerRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BankApplication.class, args);
@@ -43,6 +47,16 @@ public class BankApplication implements CommandLineRunner {
 		b2.setBankUrl(environment.getProperty("bank2-application.backend"));
 		b2.setAcquirers(new HashSet<>());
 		bankRepository.save(b2);
+
+		Acquirer acquirer=new Acquirer();
+		acquirer.setBank(b1);
+		acquirer.setQrCodePayment(true);
+		acquirer.setShopId("123456789");
+		acquirer.setMerchantId("not set");
+		acquirer.setMerchantPassword("not set");
+		acquirer.setTransactions(new HashSet<>());
+		acquirer.setBankPayment(true);
+		acquirerRepository.save(acquirer);
 	}
 
 }

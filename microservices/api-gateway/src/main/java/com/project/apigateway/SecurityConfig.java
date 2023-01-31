@@ -1,5 +1,6 @@
 package com.project.apigateway;
 
+import com.project.apigateway.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth-service/generate-jwt","/auth-service/decode-token",
-                        "/bank-service/banks/getAll", "/bank-service/acquirers/register", "/bank-service/acquirers/registerQrCode", "/bank-service/credit-cards/startPayment", "/bank-service/credit-cards/finishPayment", "/bank-service/test1")
+                .antMatchers("/auth-service/generate-jwt","/auth-service/decode-url-token","/auth-service/register-shop","/auth-service/login")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

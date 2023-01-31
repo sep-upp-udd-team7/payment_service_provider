@@ -17,6 +17,8 @@ public class Acquirer {
     private Long id;
 
     @Column(unique = true)
+    private String shopId;
+    @Column(unique = true)
     private String merchantId;
 
     private String merchantPassword;
@@ -27,6 +29,8 @@ public class Acquirer {
 
     @Column(name = "qrCodePayment")
     private Boolean qrCodePayment = false;
+
+    private Boolean bankPayment=false;
 
     @OneToMany(mappedBy = "acquirer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Transaction> transactions = new HashSet<>();
