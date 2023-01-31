@@ -3,14 +3,13 @@ package com.project.paypal.controller;
 import com.paypal.api.payments.Agreement;
 import com.paypal.api.payments.Links;
 import com.paypal.base.rest.PayPalRESTException;
+import com.project.paypal.dto.CreatePaypalSubscriptionDto;
 import com.project.paypal.dto.PaypalRedirectUrlDto;
 import com.project.paypal.service.interfaces.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -21,14 +20,15 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @GetMapping("/subscriptions/create")
-    public ResponseEntity<?> createSubscription() {
+    @PostMapping("/subscriptions/create")
+    public ResponseEntity<?> createSubscription(@RequestBody CreatePaypalSubscriptionDto createPaypalSubscriptionDto) {
         try {
-            Agreement agreement = subscriptionService.createSubscription();
+            Agreement agreement = subscriptionService.createSubscription(createPaypalSubscriptionDto.getPrice());
             for (Links link : agreement.getLinks()) {
                 if (link.getRel().equals("approval_url")) {
                     PaypalRedirectUrlDto dto = new PaypalRedirectUrlDto();
                     dto.setUrl(link.getHref());
+                    dto.setToken(agreement.getToken());
                     return new ResponseEntity<PaypalRedirectUrlDto>(dto, HttpStatus.OK);
                 }
             }

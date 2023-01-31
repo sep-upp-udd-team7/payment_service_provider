@@ -15,7 +15,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String SECRET;
-    private static final Date EXPIRATION_TIME = new Date(System.currentTimeMillis() + 120 * 60 * 1000);
+    private static final Date EXPIRATION_TIME = new Date(System.currentTimeMillis() + 12000 * 60 * 1000);
 
 
 

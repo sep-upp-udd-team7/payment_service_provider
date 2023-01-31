@@ -38,5 +38,8 @@ eureka:
       default-zone: http://eureka:password@localhost:8761/eureka
 
 psp:
-  url: 'https://localhost:4200/'
+  url: 'http://localhost:4200/'
+  subscription_cancel_url: 'http://localhost:4200/cancel-subscription'
+  subscription_confirm_rul: 'http://localhost:4200/confirm-subscription'
+
 

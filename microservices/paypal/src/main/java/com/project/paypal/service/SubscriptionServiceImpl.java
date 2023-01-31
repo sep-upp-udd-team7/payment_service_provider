@@ -11,6 +11,7 @@ import com.project.paypal.repository.SubscriptionPlanRepository;
 import com.project.paypal.repository.SubscriptionRepository;
 import com.project.paypal.service.interfaces.SubscriptionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -26,9 +27,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final SubscriptionRepository subscriptionRepository;
 
+    @Value("${psp.subscription_cancel_url}")
+    private String cancelUrl;
+
+    @Value("${psp.subscription_confirm_rul}")
+    private String confirmUrl;
+
 
     @Override
-    public Agreement createSubscription() throws PayPalRESTException, MalformedURLException, UnsupportedEncodingException {
+    public Agreement createSubscription(String price) throws PayPalRESTException, MalformedURLException, UnsupportedEncodingException {
 
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.get(1l);
         Plan plan = createPlan(subscriptionPlan);
@@ -125,8 +132,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         //merchant_preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
         merchantPreferences.setSetupFee(currency);
-        merchantPreferences.setCancelUrl("http://localhost:4200/cancel-subscription");
-        merchantPreferences.setReturnUrl("http://localhost:4200/confirm-subscription");
+        merchantPreferences.setCancelUrl(cancelUrl);
+        merchantPreferences.setReturnUrl(confirmUrl);
         merchantPreferences.setMaxFailAttempts("0");
         merchantPreferences.setAutoBillAmount("YES");
         merchantPreferences.setInitialFailAmountAction("CONTINUE");
