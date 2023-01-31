@@ -54,11 +54,16 @@ public class AcquirerServiceImpl implements AcquirerService {
             }
             acquirer.setBank(bank);
             acquirerRepository.save(acquirer);
-        }
-        if(acquirer.getMerchantId().contains("not set")) {
+        } if (acquirer.getMerchantId().contains("not set")) {
             acquirer.setMerchantId(dto.getMerchantId());
-            acquirer.setMerchantPassword(dto.getMerchantPassword());
             acquirer.setApiKey(bankResponse.getBody());
+            Bank bank = bankService.findByName(dto.getBank().getName());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            if (bank == null) {
+                loggerService.errorLog(MessageFormat.format("Bank with name {0} not found!", dto.getBank().getName()));
+                return null;
+            }
+            acquirer.setBank(bank);
             acquirerRepository.save(acquirer);
         }
         Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
