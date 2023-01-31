@@ -1,6 +1,6 @@
 package com.project.bank1.service;
 
-import com.project.bank1.dto.AcquirerDto;/
+import com.project.bank1.dto.AcquirerDto;
 import com.project.bank1.dto.MerchantCredentialsDto;
 import com.project.bank1.dto.OperationResponse;
 import com.project.bank1.mapper.BankMapper;
@@ -39,10 +39,10 @@ public class AcquirerServiceImpl implements AcquirerService {
             return null;
         }
 
-        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
-        if (acquirer == null) {
-            acquirer = new Acquirer();
-            acquirer.setMerchantId(dto.getMerchantId());
+//        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
+//        if (acquirer == null) {
+//            acquirer = new Acquirer();
+//            acquirer.setMerchantId(dto.getMerchantId());
             
         Acquirer acquirer = acquirerRepository.getByShopId(dto.getShopId());
         if(acquirer == null){
@@ -50,8 +50,6 @@ public class AcquirerServiceImpl implements AcquirerService {
             acquirer.setMerchantId(dto.getMerchantId());
             acquirer.setShopId(dto.getShopId());
             acquirer.setBankPayment(true);
-            // TODO SD: base64 encode?
-            
             acquirer.setMerchantPassword(dto.getMerchantPassword());
             acquirer.setApiKey(bankResponse.getBody());
             Bank bank = bankService.findByName(dto.getBank().getName());
@@ -62,7 +60,7 @@ public class AcquirerServiceImpl implements AcquirerService {
             acquirer.setBank(bank);
             acquirerRepository.save(acquirer);
         }
-        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
+//        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
 
         Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
         if (a == null) {
