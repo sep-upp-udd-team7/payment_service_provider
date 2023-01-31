@@ -36,7 +36,7 @@ coingate:
 
 webshop:
   url:
-    success: https://localhost:4201/success/
-    cancel: https://localhost:4201/cancel/
+    success: http://localhost:4201/success/
+    cancel: http://localhost:4201/cancel/
 
 pspfront: https://localhost:4200
