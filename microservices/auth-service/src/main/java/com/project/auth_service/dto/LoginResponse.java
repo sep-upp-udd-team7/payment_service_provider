@@ -8,4 +8,7 @@ public class LoginResponse {
     private String shopId;
 
     private String token;
+
+    private String qrCode;
+
 }

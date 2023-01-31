@@ -17,4 +17,9 @@ public class RegisterShopDto {
 
     private String returnUrl;
 
+    private Boolean using2FA;
+
+    private String secret;
+
+    private String qrCode;
 }

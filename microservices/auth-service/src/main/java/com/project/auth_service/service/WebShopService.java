@@ -7,8 +7,11 @@ import com.project.auth_service.repository.PaymentMethodRepository;
 import com.project.auth_service.repository.WebShopRepository;
 import com.project.auth_service.utils.JwtUtil;
 import com.project.auth_service.utils.RandomCharacterGenerator;
+import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.secret.SecretGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +31,14 @@ public class WebShopService {
     private final JwtUtil jwtUtil;
     private final PaymentMethodRepository paymentMethodRepository;
 
+    @Autowired
+    private SecretGenerator secretGenerator;
+
+
+    @Autowired
+    private CodeVerifier verifier;
+
+
     public WebShop getShopById(String shopId) {
         return shopRepository.getShopById(shopId);
     }
@@ -43,9 +54,15 @@ public class WebShopService {
         shop.setSuccessUrl(registerShopDto.getSuccessUrl());
         shop.setReturnUrl(registerShopDto.getReturnUrl());
         shop.setCancelUrl(registerShopDto.getCancelUrl());
+        shop.setUsing2FA(registerShopDto.getUsing2FA());
+        if (shop.getUsing2FA()) {
+            shop.setTwoFAsecret(secretGenerator.generate());
+        }
         shopRepository.save(shop);
         response.setShopSecret(shop.getShopSecret());
         response.setShopId(shop.getShopId());
+        response.setSecret(shop.getTwoFAsecret());
+        response.setUsing2FA(shop.getUsing2FA());
         return response;
     }
 
@@ -117,6 +134,13 @@ public class WebShopService {
     public LoginResponse loginWebShop(LoginDto dto){
         WebShop webShop=shopRepository.getShopByMail(dto.getMail());
         if (webShop!=null){
+
+            if (webShop.getUsing2FA()) {
+                if(!verifier.isValidCode(webShop.getTwoFAsecret(), dto.getCode())){
+                    return null;
+                }
+            }
+
             String token = null;
             if (new BCryptPasswordEncoder().matches(dto.getPassword(), webShop.getPassword())) {
                 token =jwtUtil.createToken(webShop.getShopId());
@@ -145,5 +169,15 @@ public class WebShopService {
         return shopRepository.getShopById(shopId);
     }
 
+    public Boolean checkIfEnabled2FA(String username) throws Exception {
+
+        WebShop web = shopRepository.getShopByMail(username);
+        if(web == null){ // || !user.getIsActivated()
+//            log.error("Check if 2FA is enabled for account failed. Account with username " + username + " not activated.");
+            throw new Exception("Web shop with username " + username + " not activated.");
+        }
+
+        return web.getUsing2FA();
+    }
 
 }

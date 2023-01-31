@@ -4,10 +4,20 @@ import com.project.auth_service.dto.*;
 import com.project.auth_service.mapper.ShopInfoMapper;
 import com.project.auth_service.model.WebShop;
 import com.project.auth_service.service.WebShopService;
+import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.exceptions.QrGenerationException;
+import dev.samstevens.totp.qr.QrData;
+import dev.samstevens.totp.qr.QrDataFactory;
+import dev.samstevens.totp.qr.QrGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.regex.Pattern;
+
+import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +26,17 @@ public class WebShopController {
     private final WebShopService webShopService;
 
     private final ShopInfoMapper shopInfoMapper;
+
+    @Autowired
+    private QrDataFactory qrDataFactory;
+
+    @Autowired
+    private QrGenerator qrGenerator;
+
+    @Autowired
+    private CodeVerifier verifier;
+
+
 
     @GetMapping("web-shop-url/{shopId}")
     public WebShopUrl getWebShopUrl(@PathVariable String shopId){
@@ -28,8 +49,14 @@ public class WebShopController {
     }
 
     @PostMapping("/register-shop")
-    public RegisterShopResponse registerShop(@RequestBody RegisterShopDto dto){
-        return webShopService.registerShop(dto);
+    public RegisterShopResponse registerShop(@RequestBody RegisterShopDto dto) throws QrGenerationException {
+        RegisterShopResponse res = webShopService.registerShop(dto);
+        if (dto.getUsing2FA()) {
+            QrData data = qrDataFactory.newBuilder().label(dto.getMail()).secret(res.getSecret()).issuer("PSP").build();
+            String qrCodeImage = getDataUriForImage(qrGenerator.generate(data), qrGenerator.getImageMimeType());
+            res.setQrCode(qrCodeImage);
+        }
+        return res;
     }
 
     @PostMapping("/add-payment-method")
@@ -54,10 +81,14 @@ public class WebShopController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginDto dto){
+
         LoginResponse response=webShopService.loginWebShop(dto);
-        if (response.getToken()!=null){
-            return new ResponseEntity<>(response,HttpStatus.OK);
+        if(response != null){
+            if (response.getToken() != null){
+                return new ResponseEntity<>(response,HttpStatus.OK);
+            }
         }
+
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
@@ -69,6 +100,22 @@ public class WebShopController {
             return new ResponseEntity<>(dto,HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/checkIfEnabled2FA/{username}")
+    public ResponseEntity<?> checkIfEnabled2FA(@PathVariable String username) throws Exception {
+
+        try{
+            Boolean isEnabled2FA = webShopService.checkIfEnabled2FA(username);
+
+//            log.info("Check if 2FA is enabled for account success for username: " + username);
+            return new ResponseEntity(isEnabled2FA, HttpStatus.OK);
+
+        }catch (Exception e){
+//            log.error(e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
