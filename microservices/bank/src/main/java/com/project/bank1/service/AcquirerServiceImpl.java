@@ -1,6 +1,7 @@
 package com.project.bank1.service;
 
 import com.project.bank1.dto.AcquirerDto;
+import com.project.bank1.dto.MerchantCredentialsDto;
 import com.project.bank1.dto.OperationResponse;
 import com.project.bank1.mapper.BankMapper;
 import com.project.bank1.model.Acquirer;
@@ -9,7 +10,14 @@ import com.project.bank1.repository.AcquirerRepository;
 import com.project.bank1.service.interfaces.AcquirerService;
 import com.project.bank1.service.interfaces.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.text.MessageFormat;
 
 @Service
 public class AcquirerServiceImpl implements AcquirerService {
@@ -18,48 +26,84 @@ public class AcquirerServiceImpl implements AcquirerService {
     private BankService bankService;
     @Autowired
     private AcquirerRepository acquirerRepository;
+    @Autowired
+    private Environment env;
 
     public AcquirerDto register(AcquirerDto dto) {
-
-        loggerService.infoLog(String.format("Registering acquirer with merchant ID: {} and merchant password: {}",
+        loggerService.infoLog(MessageFormat.format("Registering acquirer with merchant ID: {0} and merchant password: {1}",
                 dto.getMerchantId(), dto.getMerchantPassword()));
+
+        ResponseEntity<String> bankResponse = sendRequestForApiKeyToBank(dto);
+        if (!bankResponse.getStatusCode().is2xxSuccessful()) {
+            loggerService.errorLog("Error getting API key - invalid merchant credentials or bank is unavailable");
+            return null;
+        }
+
         Acquirer acquirer = acquirerRepository.getByShopId(dto.getShopId());
         if(acquirer == null){
             acquirer = new Acquirer();
             acquirer.setMerchantId(dto.getMerchantId());
             acquirer.setShopId(dto.getShopId());
             acquirer.setBankPayment(true);
-            // TODO SD: base64 encode?
             acquirer.setMerchantPassword(dto.getMerchantPassword());
+            acquirer.setApiKey(bankResponse.getBody());
             Bank bank = bankService.findByName(dto.getBank().getName());
             if (bank == null) {
-                loggerService.errorLog(String.format("Bank with name {} not found!", dto.getBank().getName()));
+                loggerService.errorLog(MessageFormat.format("Bank with name {0} not found!", dto.getBank().getName()));
                 return null;
             }
             acquirer.setBank(bank);
             acquirerRepository.save(acquirer);
         }
-
+        if(acquirer.getMerchantId().contains("not set")) {
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            acquirer.setApiKey(bankResponse.getBody());
+            acquirerRepository.save(acquirer);
+        }
         Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
         if (a == null) {
-            loggerService.errorLog(String.format("Acquirer with merchant ID {} not found!", dto.getMerchantId()));
+            loggerService.errorLog(MessageFormat.format("Acquirer with merchant ID {0} not found!", dto.getMerchantId()));
             return null;
         }
         dto.setId(a.getId());
         dto.setBank(new BankMapper().mapModelToDto(a.getBank()));
-        loggerService.successLog(String.format("Created acquirer with ID: {}", a.getId()));
+        loggerService.successLog(MessageFormat.format("Created acquirer with ID: {0}", a.getId()));
+        return dto;
+    }
+
+    private ResponseEntity<String> sendRequestForApiKeyToBank(AcquirerDto dto) {
+        String bankBackendUrl = bankService.findByName(dto.getBank().getName()).getBankUrl() + env.getProperty("bank.access-token");
+        loggerService.infoLog(MessageFormat.format("Sending request to bank with URL: {0}", bankBackendUrl));
+
+        ResponseEntity<String> bankResponse = WebClient.builder()
+                .build().post()
+                .uri(bankBackendUrl)
+                .body(BodyInserters.fromValue(getMerchantCredentials(dto)))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
+        return bankResponse;
+    }
+
+    private MerchantCredentialsDto getMerchantCredentials(AcquirerDto acquirer) {
+        MerchantCredentialsDto dto = new MerchantCredentialsDto();
+        dto.setMerchantId(acquirer.getMerchantId());
+        dto.setMerchantPassword(acquirer.getMerchantPassword());
+        dto.setBankName(acquirer.getBank().getName());
         return dto;
     }
 
     public Acquirer findByMerchantId(String merchantId) {
-        loggerService.infoLog(String.format("Finding acquirer by merchant ID: {}", merchantId));
+        loggerService.infoLog(MessageFormat.format("Finding acquirer by merchant ID: {0}", merchantId));
         for (Acquirer a: acquirerRepository.findAll()) {
             if (a.getMerchantId().equals(merchantId)) {
-                loggerService.successLog(String.format("Found acquirer with ID: {}", a.getId()));
+                loggerService.successLog(MessageFormat.format("Found acquirer with ID: {0}", a.getId()));
                 return a;
             }
         }
-        loggerService.errorLog(String.format("Acquirer by merchant ID: {} not found", merchantId));
+        loggerService.errorLog(MessageFormat.format("Acquirer by merchant ID: {0} not found", merchantId));
         return null;
     }
 
@@ -129,5 +173,16 @@ public class AcquirerServiceImpl implements AcquirerService {
         OperationResponse response=new OperationResponse();
         response.setOperationResponse(false);
         return response;
+    }
+
+    @Override
+    public Acquirer findByShopId(String shopId) {
+        loggerService.infoLog("Finding acquirer by shop ID: " + shopId);
+        for (Acquirer a: acquirerRepository.findAll()) {
+            if (a.getShopId().equals(shopId)) {
+                return a;
+            }
+        }
+        return null;
     }
 }

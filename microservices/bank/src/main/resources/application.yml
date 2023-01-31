@@ -43,3 +43,6 @@ psp:
   success-payment: /bank-success
   failed-payment: /bank-failed
 
+bank:
+  access-token: /api-keys/generate
+

@@ -18,6 +18,7 @@ public class Acquirer {
 
     @Column(unique = true)
     private String shopId;
+
     @Column(unique = true)
     private String merchantId;
 
@@ -34,4 +35,6 @@ public class Acquirer {
 
     @OneToMany(mappedBy = "acquirer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Transaction> transactions = new HashSet<>();
+
+    private String apiKey;
 }
