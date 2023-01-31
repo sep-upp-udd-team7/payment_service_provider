@@ -37,14 +37,13 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public RequestDto validateAcquirer(OnboardingRequestDto dto) throws Exception {
-        loggerService.infoLog(MessageFormat.format("Validating acquirer by merchant ID: {0} for merchant order ID: {1}",
-                dto.getMerchantId(), dto.getMerchantOrderId()));
+        loggerService.infoLog(MessageFormat.format("Validating acquirer by shop ID: {0} for merchant order ID: {1}",
+                dto.getShopId(), dto.getMerchantOrderId()));
         String pspFrontendUrl = env.getProperty("psp.frontend");
 
-        // TODO SD: na auth service-a izvuci merchant id
-        Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
+        Acquirer acquirer = acquirerService.findByShopId(dto.getShopId());
         if(acquirer == null) {
-            String message = MessageFormat.format("Merchant's credentials are incorrect (ID: {0}) or merchant is not registered", dto.getMerchantId());
+            String message = MessageFormat.format("Merchant's credentials are incorrect (shop ID: {0}) or merchant is not registered", dto.getShopId());
             loggerService.errorLog(message);
             throw new Exception(message);
         }
@@ -58,17 +57,16 @@ public class CreditCardServiceImpl implements CreditCardService {
         request.setFailedUrl(pspFrontendUrl + env.getProperty("psp.failed-payment"));
         request.setErrorUrl(pspFrontendUrl + env.getProperty("psp.error-payment"));
         request.setQrCode(dto.getQrCode());
-        loggerService.successLog(MessageFormat.format("Successfully validated acquirer (ID: {0}) ", dto.getMerchantId()));
+        loggerService.successLog(MessageFormat.format("Successfully validated acquirer (shop ID: {0}) ", dto.getShopId()));
         return request;
     }
 
     @Override
     public AcquirerResponseDto startPayment(OnboardingRequestDto dto) throws Exception {
-        loggerService.infoLog(MessageFormat.format("Stating payment by merchant ID: {0}", dto.getMerchantId()));
+        loggerService.infoLog(MessageFormat.format("Stating payment by shop ID: {0}", dto.getShopId()));
         RequestDto request = validateAcquirer(dto);
-        Acquirer acquirer = acquirerService.findByMerchantId(dto.getMerchantId());
+        Acquirer acquirer = acquirerService.findByShopId(dto.getShopId());
         Transaction transaction = transactionService.createTransaction(request, acquirer);
-        System.out.println("Url for redirecting: " + acquirer.getBank().getBankUrl() + validateIssuerEndpoint);
         try {
             loggerService.infoLog(MessageFormat.format("Sending POST request to bank application on URL: {0}",
                     acquirer.getBank().getBankUrl() + validateIssuerEndpoint));

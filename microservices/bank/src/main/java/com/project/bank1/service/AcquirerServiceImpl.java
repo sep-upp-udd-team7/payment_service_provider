@@ -35,15 +35,10 @@ public class AcquirerServiceImpl implements AcquirerService {
 
         ResponseEntity<String> bankResponse = sendRequestForApiKeyToBank(dto);
         if (!bankResponse.getStatusCode().is2xxSuccessful()) {
-            loggerService.errorLog("Invalid merchant credentials or bank is unavailable");
+            loggerService.errorLog("Error getting API key - invalid merchant credentials or bank is unavailable");
             return null;
         }
 
-//        Acquirer acquirer = acquirerRepository.findByMerchantId(dto.getMerchantId());
-//        if (acquirer == null) {
-//            acquirer = new Acquirer();
-//            acquirer.setMerchantId(dto.getMerchantId());
-            
         Acquirer acquirer = acquirerRepository.getByShopId(dto.getShopId());
         if(acquirer == null){
             acquirer = new Acquirer();
@@ -60,8 +55,12 @@ public class AcquirerServiceImpl implements AcquirerService {
             acquirer.setBank(bank);
             acquirerRepository.save(acquirer);
         }
-//        Acquirer a = acquirerRepository.findByMerchantId(dto.getMerchantId());
-
+        if(acquirer.getMerchantId().contains("not set")) {
+            acquirer.setMerchantId(dto.getMerchantId());
+            acquirer.setMerchantPassword(dto.getMerchantPassword());
+            acquirer.setApiKey(bankResponse.getBody());
+            acquirerRepository.save(acquirer);
+        }
         Acquirer a = acquirerRepository.getByShopId(dto.getShopId());
         if (a == null) {
             loggerService.errorLog(MessageFormat.format("Acquirer with merchant ID {0} not found!", dto.getMerchantId()));
@@ -174,5 +173,16 @@ public class AcquirerServiceImpl implements AcquirerService {
         OperationResponse response=new OperationResponse();
         response.setOperationResponse(false);
         return response;
+    }
+
+    @Override
+    public Acquirer findByShopId(String shopId) {
+        loggerService.infoLog("Finding acquirer by shop ID: " + shopId);
+        for (Acquirer a: acquirerRepository.findAll()) {
+            if (a.getShopId().equals(shopId)) {
+                return a;
+            }
+        }
+        return null;
     }
 }

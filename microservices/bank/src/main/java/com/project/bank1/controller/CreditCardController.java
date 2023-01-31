@@ -22,8 +22,8 @@ public class CreditCardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/startPayment")
     public ResponseEntity<?> startPayment(@RequestBody OnboardingRequestDto dto){
-        loggerService.infoLog(MessageFormat.format("Start payment by validating acquirer. Merchant ID: {0} with order ID: {1}",
-                dto.getMerchantId(), dto.getMerchantOrderId()));
+        loggerService.infoLog(MessageFormat.format("Start payment by validating acquirer. Shop ID: {0} with order ID: {1}",
+                dto.getShopId(), dto.getMerchantOrderId()));
         try {
             return new ResponseEntity<>(creditCardService.startPayment(dto), HttpStatus.OK);
         } catch (Exception e) {

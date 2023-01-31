@@ -14,4 +14,6 @@ public interface AcquirerService {
     OperationResponse removeQrCode(String shopId);
 
     OperationResponse removeBankPayment(String shopId);
+
+    Acquirer findByShopId(String shopId);
 }
