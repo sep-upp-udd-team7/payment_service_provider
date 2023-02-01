@@ -57,8 +57,8 @@ public class CreditCardServiceImpl implements CreditCardService {
             throw new Exception(message);
         }
         // TODO: proveriti na koje stranice se redirektuju ovi linkovi
-        request.setSuccessUrl(webShopUrl.getSuccessUrl() + "/" + dto.getShopId());
-        request.setFailedUrl(webShopUrl.getCancelUrl() + "/" + dto.getShopId() );
+        request.setSuccessUrl(webShopUrl.getSuccessUrl() + "/" + dto.getMerchantOrderId());
+        request.setFailedUrl(webShopUrl.getCancelUrl() + "/" + dto.getMerchantOrderId() );
         request.setErrorUrl(webShopUrl.getReturnUrl());
         request.setQrCode(dto.getQrCode());
         loggerService.successLog(MessageFormat.format("Successfully validated acquirer (shop ID: {0}) ", dto.getShopId()));
