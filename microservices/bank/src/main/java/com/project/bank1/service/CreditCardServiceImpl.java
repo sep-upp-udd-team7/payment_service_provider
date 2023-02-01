@@ -134,7 +134,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         loggerService.infoLog(MessageFormat.format("Transaction is: {0} with payment ID: {1}", dto.getTransactionStatus(), dto.getPaymentId()));
         String redirectionUrl = getRedirectionUrl(dto.getTransactionStatus(), t);
 
-        return ;
+        return redirectionUrl;
     }
 
     private String getRedirectionUrl(String transactionStatus, Transaction transaction) {
