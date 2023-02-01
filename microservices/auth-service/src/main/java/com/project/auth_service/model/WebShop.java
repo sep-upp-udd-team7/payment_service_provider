@@ -36,6 +36,7 @@ public class WebShop extends Model{
     @Column(name = "using_2fa")
     private Boolean using2FA;
 
+    @Column(name = "two_factor")
     private String twoFAsecret;
 
     @ManyToMany
