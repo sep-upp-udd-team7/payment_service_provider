@@ -47,6 +47,7 @@ psp:
   error-payment: /bank-cancel
   success-payment: /bank-success
   failed-payment: /bank-failed
+  auth-service: http://localhost:8083/web-shop-url/
 
 bank:
   access-token: /api-keys/generate

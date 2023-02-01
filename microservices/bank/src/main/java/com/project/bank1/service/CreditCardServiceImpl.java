@@ -1,9 +1,6 @@
 package com.project.bank1.service;
 
-import com.project.bank1.dto.AcquirerResponseDto;
-import com.project.bank1.dto.OnboardingRequestDto;
-import com.project.bank1.dto.RequestDto;
-import com.project.bank1.dto.ResponseDto;
+import com.project.bank1.dto.*;
 import com.project.bank1.enums.TransactionStatus;
 import com.project.bank1.model.Acquirer;
 import com.project.bank1.model.Transaction;
@@ -34,13 +31,13 @@ public class CreditCardServiceImpl implements CreditCardService {
     private TransactionService transactionService;
     @Autowired
     private WebClient webClient;
+    @Autowired
+    private Environment environment;
 
     @Override
     public RequestDto validateAcquirer(OnboardingRequestDto dto) throws Exception {
         loggerService.infoLog(MessageFormat.format("Validating acquirer by shop ID: {0} for merchant order ID: {1}",
                 dto.getShopId(), dto.getMerchantOrderId()));
-        String pspFrontendUrl = env.getProperty("psp.frontend");
-
         Acquirer acquirer = acquirerService.findByShopId(dto.getShopId());
         if(acquirer == null) {
             String message = MessageFormat.format("Merchant's credentials are incorrect (shop ID: {0}) or merchant is not registered", dto.getShopId());
@@ -53,12 +50,33 @@ public class CreditCardServiceImpl implements CreditCardService {
         request.setMerchantPassword(acquirer.getMerchantPassword());
         request.setMerchantOrderId(dto.getMerchantOrderId());
         request.setMerchantTimestamp(dto.getMerchantTimestamp());
-        request.setSuccessUrl(pspFrontendUrl + env.getProperty("psp.success-payment"));
-        request.setFailedUrl(pspFrontendUrl + env.getProperty("psp.failed-payment"));
-        request.setErrorUrl(pspFrontendUrl + env.getProperty("psp.error-payment"));
+        WebShopUrl webShopUrl = getWebShopUrls(dto.getShopId());
+        if (webShopUrl == null) {
+            String message = MessageFormat.format("Error getting web shop URL for redirection (shop ID: {0})", dto.getShopId());
+            loggerService.errorLog(message);
+            throw new Exception(message);
+        }
+        // TODO: proveriti na koje stranice se redirektuju ovi linkovi
+        request.setSuccessUrl(webShopUrl.getSuccessUrl() + "/" + dto.getShopId());
+        request.setFailedUrl(webShopUrl.getCancelUrl() + "/" + dto.getShopId() );
+        request.setErrorUrl(webShopUrl.getReturnUrl());
         request.setQrCode(dto.getQrCode());
         loggerService.successLog(MessageFormat.format("Successfully validated acquirer (shop ID: {0}) ", dto.getShopId()));
         return request;
+    }
+
+    private WebShopUrl getWebShopUrls(String shopId) {
+        String authServiceWebShopUrls = environment.getProperty("psp.auth-service");
+        ResponseEntity<WebShopUrl> response = webClient.get()
+                .uri( authServiceWebShopUrls + shopId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(WebShopUrl.class)
+                .block();
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return null;
+        }
+        return response.getBody();
     }
 
     @Override
@@ -114,7 +132,9 @@ public class CreditCardServiceImpl implements CreditCardService {
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
         transactionService.save(t); //TODO:DODATO
         loggerService.infoLog(MessageFormat.format("Transaction is: {0} with payment ID: {1}", dto.getTransactionStatus(), dto.getPaymentId()));
-        return getRedirectionUrl(dto.getTransactionStatus(), t);
+        String redirectionUrl = getRedirectionUrl(dto.getTransactionStatus(), t);
+
+        return redirectionUrl;
     }
 
     private String getRedirectionUrl(String transactionStatus, Transaction transaction) {

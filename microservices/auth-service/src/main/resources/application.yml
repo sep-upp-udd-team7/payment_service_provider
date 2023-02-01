@@ -23,8 +23,6 @@ spring:
 jwt:
   secret: security
 
-
-
 server:
   port: 8083
 #  ssl:
