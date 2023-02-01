@@ -11,4 +11,6 @@ public class LoginResponse {
 
     private String qrCode;
 
+    private String roles;
+
 }

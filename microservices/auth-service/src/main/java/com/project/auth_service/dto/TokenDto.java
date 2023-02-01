@@ -9,4 +9,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TokenDto {
     private String token;
+    private String roles;
+
+    public TokenDto(String token) {
+        this.token = token;
+    }
 }

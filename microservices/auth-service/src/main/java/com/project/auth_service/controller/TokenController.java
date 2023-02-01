@@ -48,9 +48,9 @@ public class TokenController {
 
     @PostMapping("/generate-jwt")
     public ResponseEntity<TokenDto> generateJwtToken(@RequestBody AuthDto dto){
-        String token= authService.generateToken(dto.getClientId(),dto.getClientSecret());
-        if (token!=null){
-            return new ResponseEntity<>(new TokenDto(token), HttpStatus.OK);
+        TokenDto tokenDto = authService.generateToken(dto.getClientId(),dto.getClientSecret());
+        if (tokenDto!=null){
+            return new ResponseEntity<>(tokenDto, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(new TokenDto(null),HttpStatus.UNAUTHORIZED);
         }

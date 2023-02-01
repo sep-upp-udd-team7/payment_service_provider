@@ -2,6 +2,7 @@ package com.project.auth_service.service;
 
 import com.project.auth_service.dto.*;
 import com.project.auth_service.model.PaymentMethod;
+import com.project.auth_service.model.Role;
 import com.project.auth_service.model.WebShop;
 import com.project.auth_service.repository.PaymentMethodRepository;
 import com.project.auth_service.repository.WebShopRepository;
@@ -143,11 +144,17 @@ public class WebShopService {
                 }
             }
 
+            String roles = "";
+            for(Role role : webShop.getRoles()){
+                roles += role.getName() + " ";
+            }
+
             String token = null;
             if (new BCryptPasswordEncoder().matches(dto.getPassword(), webShop.getPassword())) {
-                token =jwtUtil.createToken(webShop.getShopId());
+                token =jwtUtil.createToken(webShop.getShopId(), roles);
                 LoginResponse loginResponse=new LoginResponse();
                 loginResponse.setToken(token);
+                loginResponse.setRoles(roles);
                 loginResponse.setShopId(webShop.getShopId());
                 return loginResponse;
             }

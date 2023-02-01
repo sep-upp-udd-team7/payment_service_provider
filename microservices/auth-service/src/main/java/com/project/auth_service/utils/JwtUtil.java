@@ -19,12 +19,13 @@ public class JwtUtil {
 
 
 
-    public String createToken(String clientId) {
+    public String createToken(String clientId, String roles) {
         Algorithm algorithm = Algorithm.HMAC256(SECRET.getBytes());
         return JWT.create()
                 .withSubject("PaymentServiceProvider")
                 .withExpiresAt(EXPIRATION_TIME)
                 .withClaim("clientId",clientId)
+                .withClaim("roles",roles)
                 .sign(algorithm);
     }
 

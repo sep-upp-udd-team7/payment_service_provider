@@ -3,7 +3,9 @@ package com.project.auth_service.service;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.project.auth_service.dto.TokenDto;
 import com.project.auth_service.dto.TokenValidationResponseDto;
+import com.project.auth_service.model.Role;
 import com.project.auth_service.model.WebShop;
 import com.project.auth_service.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +19,17 @@ public class AuthService {
     private final WebShopService webShopService;
     private final JwtUtil jwtUtil;
 
-    public String generateToken(String clientId, String clientSecret) {
+    public TokenDto generateToken(String clientId, String clientSecret) {
         WebShop shop = webShopService.getShopById(clientId);
+        String roles = "";
+        for(Role role : shop.getRoles()){
+            roles += role.getName() + " ";
+        }
         String token = null;
         if (new BCryptPasswordEncoder().matches(clientSecret, shop.getShopSecret())) {
-            token = jwtUtil.createToken(clientId);
+            token = jwtUtil.createToken(clientId, roles);
         }
-        return token;
+        return new TokenDto(token, roles);
     }
 
     public TokenValidationResponseDto validateToken(String token) {
