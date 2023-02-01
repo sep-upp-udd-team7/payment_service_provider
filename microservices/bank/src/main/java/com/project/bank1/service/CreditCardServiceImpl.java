@@ -38,8 +38,6 @@ public class CreditCardServiceImpl implements CreditCardService {
     public RequestDto validateAcquirer(OnboardingRequestDto dto) throws Exception {
         loggerService.infoLog(MessageFormat.format("Validating acquirer by shop ID: {0} for merchant order ID: {1}",
                 dto.getShopId(), dto.getMerchantOrderId()));
-        String pspFrontendUrl = env.getProperty("psp.frontend");
-
         Acquirer acquirer = acquirerService.findByShopId(dto.getShopId());
         if(acquirer == null) {
             String message = MessageFormat.format("Merchant's credentials are incorrect (shop ID: {0}) or merchant is not registered", dto.getShopId());
@@ -134,7 +132,9 @@ public class CreditCardServiceImpl implements CreditCardService {
         t.setStatus(getTransactionStatusFromDto(dto.getTransactionStatus()));
         transactionService.save(t); //TODO:DODATO
         loggerService.infoLog(MessageFormat.format("Transaction is: {0} with payment ID: {1}", dto.getTransactionStatus(), dto.getPaymentId()));
-        return getRedirectionUrl(dto.getTransactionStatus(), t);
+        String redirectionUrl = getRedirectionUrl(dto.getTransactionStatus(), t);
+
+        return ;
     }
 
     private String getRedirectionUrl(String transactionStatus, Transaction transaction) {
