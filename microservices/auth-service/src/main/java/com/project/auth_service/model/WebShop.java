@@ -1,6 +1,8 @@
 package com.project.auth_service.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -10,6 +12,8 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class WebShop extends Model{
 
     private String name;
@@ -27,6 +31,11 @@ public class WebShop extends Model{
     private String cancelUrl;
 
     private String returnUrl;
+
+    @Column(name = "using_2fa")
+    private Boolean using2FA;
+
+    private String twoFAsecret;
 
     @ManyToMany
     @JoinTable(
