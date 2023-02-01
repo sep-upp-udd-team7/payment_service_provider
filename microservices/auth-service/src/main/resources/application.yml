@@ -23,10 +23,6 @@ spring:
 jwt:
   secret: security
 
-psp:
-  auth-service: http://localhost:8000/auth-service/web-shop-url/
-
-
 server:
   port: 8083
 
