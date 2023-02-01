@@ -8,6 +8,7 @@ import com.project.bank1.service.interfaces.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +19,14 @@ public class BankServiceImpl implements BankService {
     private BankRepository bankRepository;
 
     public Bank findByName(String name) {
-        loggerService.infoLog(String.format("Finding bank by bank name: {}", name));
+        loggerService.infoLog(MessageFormat.format("Finding bank by bank name: {0}", name));
         for (Bank b: bankRepository.findAll()) {
             if (b.getName().equals(name)) {
-                loggerService.successLog(String.format("Found bank with ID: {} by name: {}", b.getId(), b.getName()));
+                loggerService.successLog(MessageFormat.format("Found bank with ID: {0} by name: {1}", b.getId(), b.getName()));
                 return b;
             }
         }
-        loggerService.errorLog(String.format("Not found bank with name: ", name));
+        loggerService.errorLog(MessageFormat.format("Not found bank with name: ", name));
         return null;
     }
 
@@ -35,7 +36,7 @@ public class BankServiceImpl implements BankService {
         for (Bank b: bankRepository.findAll()) {
             dtos.add(new BankMapper().mapModelToDto(b));
         }
-        loggerService.debugLog(String.format("Found {} banks in Payment service provider", dtos.size()));
+        loggerService.debugLog(MessageFormat.format("Found {0} banks in Payment service provider", dtos.size()));
         return dtos;
     }
 }

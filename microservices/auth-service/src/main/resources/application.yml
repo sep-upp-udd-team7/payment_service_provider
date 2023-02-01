@@ -27,8 +27,20 @@ jwt:
 
 server:
   port: 8083
+#  ssl:
+#    key-store: classpath:local-ssl.p12
+#    key-store-password: password
+#    keyStoreType: PKCS12
+#    keyAlias: local_ssl
 
 eureka:
   client:
     service-url:
       default-zone: http://eureka:password@localhost:8761/eureka
+
+
+
+shop:
+  paypal: 'http://localhost:8084/'
+  bank: 'http://localhost:8080/'
+  crypto: 'http://localhost:8082/'

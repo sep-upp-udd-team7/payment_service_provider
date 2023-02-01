@@ -3,6 +3,8 @@ package com.project.apigateway;
 import dto.TokenDto;
 import dto.TokenValidationResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +28,8 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter{
 
-
+    @Autowired
+    Environment environment;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -39,7 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            WebClient webClient = WebClient.create("http://localhost:8083");
+            WebClient webClient = WebClient.create(environment.getProperty("webClient.url"));
             TokenDto token = new TokenDto(jwt);
             validationResponse = webClient.post()
                     .uri("/validate-jwt")

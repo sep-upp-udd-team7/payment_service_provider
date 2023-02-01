@@ -12,6 +12,7 @@ import dev.samstevens.totp.secret.SecretGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,7 +26,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class WebShopService {
-
+    @Autowired
+    private Environment environment;
     private final WebShopRepository shopRepository;
 
     private final JwtUtil jwtUtil;
@@ -157,10 +159,10 @@ public class WebShopService {
 
     private String resolveServiceUrl(PaymentMethod paymentMethod) {
         switch (paymentMethod.getName()){
-            case "PAYPAL": return "http://localhost:8084/unsubscribe-web-shop";
-            case "BANK": return "http://localhost:8080/acquirers/remove-bank-payment";
-            case "QR_CODE": return "http://localhost:8080/acquirers/remove-qrcode";
-            case "CRYPTO": return "http://localhost:8082/unsubscribe-web-shop";
+            case "PAYPAL": return  "http://localhost:8084/" + "unsubscribe-web-shop";
+            case "BANK": return  environment.getProperty("shop.bank") + "acquirers/remove-bank-payment";
+            case "QR_CODE": return  environment.getProperty("shop.bank") + "acquirers/remove-qrcode";
+            case "CRYPTO": return  environment.getProperty("shop.crypto") + "unsubscribe-web-shop";
         }
         return "";
     }

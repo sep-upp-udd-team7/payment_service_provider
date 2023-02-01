@@ -34,7 +34,4 @@ public class LocalTransaction extends Model {
 
     private String merchantMail;
 
-    @ManyToOne
-    @JoinColumn(name = "merchant_id")
-    private Merchant merchant;
 }

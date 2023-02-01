@@ -11,6 +11,6 @@ public class OnboardingRequestDto {
     private String merchantOrderId;
     private Double amount;
     private LocalDateTime merchantTimestamp;
-    private String merchantId;  // TODO SD: merchant id obrisati - kada bude uradjena autentifikacija
+    private String shopId;
     private Boolean qrCode;
 }

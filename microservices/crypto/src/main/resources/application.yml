@@ -39,4 +39,4 @@ webshop:
     success: http://localhost:4201/success/
     cancel: http://localhost:4201/cancel/
 
-pspfront: http://localhost:4200
+pspfront: https://localhost:4200
