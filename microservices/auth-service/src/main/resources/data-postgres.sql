@@ -1,6 +1,6 @@
 INSERT INTO public.web_shops(
 cancel_url, mail, name, password, return_url, shop_id,shop_secret, success_url, two_factor, using_2fa)
-VALUES ('http://localhost:4201/cancel', 'shop@gmail.com', 'shop', '$2a$10$PykB0/Aj91GVA0krxaVTHOw2a1vmDa.ejFc73TnAMqebz4BcPlm.O', 'http://localhost:4201', '123456789','qlpyTO_IQu656gbX9mmKbw', 'http://localhost:4201/success', 'SNL6LALUUW7U7OJ53PIJS7EALSWQVUAQ', true);
+VALUES ('http://localhost:4201/cancel', 'shop@gmail.com', 'shop', '$2a$10$PykB0/Aj91GVA0krxaVTHOw2a1vmDa.ejFc73TnAMqebz4BcPlm.O', 'http://localhost:4201', '123456789','$2a$10$WbWMT9U92Fq6lwNEmzvhQe56e/hbP99X0XIP750ZPvEw95bHyo.c.', 'http://localhost:4201/success', 'SNL6LALUUW7U7OJ53PIJS7EALSWQVUAQ', true);
 
 INSERT INTO public.payment_methods(add_payment_method_url,
 name)

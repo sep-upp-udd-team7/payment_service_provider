@@ -29,7 +29,10 @@ public class AuthService {
         if (new BCryptPasswordEncoder().matches(clientSecret, shop.getShopSecret())) {
             token = jwtUtil.createToken(clientId, roles);
         }
-        return new TokenDto(token, roles);
+        TokenDto dto=new TokenDto();
+        dto.setToken(token);
+        dto.setRoles(roles);
+        return dto;
     }
 
     public TokenValidationResponseDto validateToken(String token) {
